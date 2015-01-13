@@ -1,0 +1,3 @@
+[submodule "SlicerQCExtensions/ImageEval/Resources/Python/requests"]
+	path = SlicerQCExtensions/ImageEval/Resources/Python/requests
+	url = git://github.com/kennethreitz/requests.git
