@@ -69,6 +69,24 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
         self.reloadAndTestButton.connect('clicked()', self.onReloadAndTest)
 
     #
+    # Markups Area
+    #
+    markupsCollapsibleButton = ctk.ctkCollapsibleButton()
+    markupsCollapsibleButton.text = "Markups"
+    self.layout.addWidget(markupsCollapsibleButton)
+
+    # Layout within the dummy collapsible button
+    markupsFormLayout = qt.QFormLayout(markupsCollapsibleButton)
+
+    #
+    # Adds the Markups widget
+    #
+    self.localMarkupsWidget = slicer.modules.markups.widgetRepresentation()
+    self.localMarkupsWidget.setParent(self.parent)
+    markupsFormLayout.addRow(self.localMarkupsWidget)
+    self.localMarkupsWidget.show()
+
+    #
     # Adds the Editor Widget
     #
     self.localEditorWidget = Editor.EditorWidget(parent=self.parent, showVolumesFrame=False)
