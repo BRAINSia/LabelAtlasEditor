@@ -40,6 +40,34 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     # Instantiate and connect widgets ...
 
     #
+    # Reload and Test area
+    #
+    if True:
+        """Developer interface"""
+        reloadCollapsibleButton = ctk.ctkCollapsibleButton()
+        reloadCollapsibleButton.text = "Advanced - Reload && Test"
+        reloadCollapsibleButton.collapsed = False
+        self.layout.addWidget(reloadCollapsibleButton)
+        reloadFormLayout = qt.QFormLayout(reloadCollapsibleButton)
+
+        # reload button
+        # (use this during development, but remove it when delivering
+        #  your module to users)
+        self.reloadButton = qt.QPushButton("Reload")
+        self.reloadButton.toolTip = "Reload this module."
+        self.reloadButton.name = "Module Reload"
+        reloadFormLayout.addWidget(self.reloadButton)
+        self.reloadButton.connect('clicked()', self.onReload)
+
+        # reload and test button
+        # (use this during development, but remove it when delivering
+        #  your module to users)
+        self.reloadAndTestButton = qt.QPushButton("Reload and Test")
+        self.reloadAndTestButton.toolTip = "Reload this module and then run the self tests."
+        reloadFormLayout.addWidget(self.reloadAndTestButton)
+        self.reloadAndTestButton.connect('clicked()', self.onReloadAndTest)
+
+    #
     # Parameters Area
     #
     parametersCollapsibleButton = ctk.ctkCollapsibleButton()
