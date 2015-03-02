@@ -2,6 +2,7 @@ import os
 import unittest
 from __main__ import vtk, qt, ctk, slicer
 from slicer.ScriptedLoadableModule import *
+import Editor
 
 #
 # OpenAtlasEditor
@@ -66,6 +67,13 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
         self.reloadAndTestButton.toolTip = "Reload this module and then run the self tests."
         reloadFormLayout.addWidget(self.reloadAndTestButton)
         self.reloadAndTestButton.connect('clicked()', self.onReloadAndTest)
+
+    #
+    # Adds the Editor Widget
+    #
+    self.localEditorWidget = Editor.EditorWidget(parent=self.parent, showVolumesFrame=False)
+    self.localEditorWidget.setup()
+    self.localEditorWidget.enter()
 
     #
     # Parameters Area
