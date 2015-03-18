@@ -3,6 +3,8 @@ import unittest
 from __main__ import vtk, qt, ctk, slicer
 from slicer.ScriptedLoadableModule import *
 import Editor
+import SimpleITK as sitk
+import sitkUtils as su
 
 #
 # OpenAtlasEditor
@@ -183,6 +185,22 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     return True
 
+  def relabel(self, labelImage, newRegion, newLabel):
+    newLabelImage = sitk.Cast(labelImage, sitk.sitkInt32) * sitk.Cast((newRegion == 0), sitk.sitkInt32) \
+                    + sitk.Cast(newLabel * (newRegion > 0), sitk.sitkInt32)
+    return newLabelImage
+
+  def mergeLabels(self, labelImageName, posteriorImageName, regionLabel=24, testLabel=999, threshold=0.1):
+    labelImage = su.PullFromSlicer(labelImageName)
+    region_999 = ((labelImage == regionLabel) + (labelImage == testLabel))
+    su.PushLabel(region_999, 'region_999')
+    posterior = su.PullFromSlicer(posteriorImageName)
+    connectedRegion = sitk.ConnectedComponent(region_999, True)
+    relabeledConnectedRegion = sitk.RelabelComponent(connectedRegion)
+    newRegion = (relabeledConnectedRegion == 1) * (posterior > threshold)
+    su.PushLabel(newRegion, 'newRegion')
+    newLabel = self.relabel(labelImage, newRegion > 0, 24)
+    su.PushLabel(newLabel, 'newLabel')
 
 class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
   """
