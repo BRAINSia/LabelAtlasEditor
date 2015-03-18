@@ -200,7 +200,9 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
   def onApplyButton(self):
     logic = OpenAtlasEditorLogic()
     print("Apply button selected")
-    logic.run()
+    logic.run(self.inputSelectorLabel.currentNode().GetName(),
+              self.inputSelector.currentNode().GetName(),
+              self.outputSelectorLabel.currentNode().GetName())
 
 
 #
@@ -230,12 +232,13 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       return False
     return True
 
-  def run(self):
+  def run(self, labelImageName, posteriorImageName, outputImageName):
     """
     Run the actual algorithm
     """
 
     self.delayDisplay('Running')
+    self.mergeLabels(labelImageName, posteriorImageName, outputImageName)
 
     return True
 
@@ -244,7 +247,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
                     + sitk.Cast(newLabel * (newRegion > 0), sitk.sitkInt32)
     return newLabelImage
 
-  def mergeLabels(self, labelImageName, posteriorImageName, regionLabel=24, testLabel=999, threshold=0.1):
+  def mergeLabels(self, labelImageName, posteriorImageName, outputImageName, regionLabel=24, testLabel=999, threshold=0.1):
     labelImage = su.PullFromSlicer(labelImageName)
     region_999 = ((labelImage == regionLabel) + (labelImage == testLabel))
     su.PushLabel(region_999, 'region_999')
@@ -254,7 +257,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     newRegion = (relabeledConnectedRegion == 1) * (posterior > threshold)
     su.PushLabel(newRegion, 'newRegion')
     newLabel = self.relabel(labelImage, newRegion > 0, 24)
-    su.PushLabel(newLabel, 'newLabel')
+    su.PushLabel(newLabel, outputImageName)
 
 class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
   """
