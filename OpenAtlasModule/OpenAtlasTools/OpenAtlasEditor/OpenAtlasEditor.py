@@ -71,6 +71,65 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
         self.reloadAndTestButton.connect('clicked()', self.onReloadAndTest)
 
     #
+    # Parameters Area
+    #
+    parametersCollapsibleButton = ctk.ctkCollapsibleButton()
+    parametersCollapsibleButton.text = "Parameters"
+    self.layout.addWidget(parametersCollapsibleButton)
+
+    # Layout within the dummy collapsible button
+    parametersFormLayout = qt.QFormLayout(parametersCollapsibleButton)
+
+    #
+    # input label map selector
+    #
+    self.inputSelectorLabel = slicer.qMRMLNodeComboBox()
+    self.inputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.inputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", 1 )
+    self.inputSelectorLabel.selectNodeUponCreation = True
+    self.inputSelectorLabel.addEnabled = False
+    self.inputSelectorLabel.removeEnabled = False
+    self.inputSelectorLabel.noneEnabled = False
+    self.inputSelectorLabel.showHidden = False
+    self.inputSelectorLabel.showChildNodeTypes = False
+    self.inputSelectorLabel.setMRMLScene( slicer.mrmlScene )
+    self.inputSelectorLabel.setToolTip( "Pick the input label map to the algorithm." )
+    parametersFormLayout.addRow("Input Label Map Volume: ", self.inputSelectorLabel)
+
+    #
+    # input volume selector
+    #
+    self.inputSelector = slicer.qMRMLNodeComboBox()
+    self.inputSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.inputSelector.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", 0 )
+    self.inputSelector.selectNodeUponCreation = True
+    self.inputSelector.addEnabled = False
+    self.inputSelector.removeEnabled = False
+    self.inputSelector.noneEnabled = False
+    self.inputSelector.showHidden = False
+    self.inputSelector.showChildNodeTypes = False
+    self.inputSelector.setMRMLScene( slicer.mrmlScene )
+    self.inputSelector.setToolTip( "Pick the input to the algorithm." )
+    parametersFormLayout.addRow("Input Volume: ", self.inputSelector)
+    
+    #
+    # output label map selector
+    #
+    self.outputSelectorLabel = slicer.qMRMLNodeComboBox()
+    self.outputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.outputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", 1 )
+    self.outputSelectorLabel.selectNodeUponCreation = False
+    self.outputSelectorLabel.addEnabled = True
+    self.outputSelectorLabel.renameEnabled = True
+    self.outputSelectorLabel.removeEnabled = True
+    self.outputSelectorLabel.noneEnabled = False
+    self.outputSelectorLabel.showHidden = False
+    self.outputSelectorLabel.showChildNodeTypes = False
+    self.outputSelectorLabel.setMRMLScene( slicer.mrmlScene )
+    self.outputSelectorLabel.setToolTip( "Pick the output label map to the algorithm." )
+    parametersFormLayout.addRow("Output Label Map Volume: ", self.outputSelectorLabel)
+
+    #
     # Markups Area
     #
     markupsCollapsibleButton = ctk.ctkCollapsibleButton()
@@ -114,16 +173,6 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.localEditorWidget.enter()
 
     #
-    # Parameters Area
-    #
-    parametersCollapsibleButton = ctk.ctkCollapsibleButton()
-    parametersCollapsibleButton.text = "Parameters"
-    self.layout.addWidget(parametersCollapsibleButton)
-
-    # Layout within the dummy collapsible button
-    parametersFormLayout = qt.QFormLayout(parametersCollapsibleButton)
-
-    #
     # Apply Button
     #
     self.applyButton = qt.QPushButton("Apply")
@@ -133,6 +182,9 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
 
     # connections
     self.applyButton.connect('clicked(bool)', self.onApplyButton)
+    self.inputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
+    self.inputSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
+    self.outputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
 
     # Add vertical spacer
     self.layout.addStretch(1)
@@ -141,7 +193,9 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     pass
 
   def onSelect(self):
-    self.applyButton.enabled = True
+    self.applyButton.enabled = self.inputSelectorLabel.currentNode() \
+                               and self.inputSelector.currentNode() \
+                               and self.outputSelectorLabel.currentNode()
 
   def onApplyButton(self):
     logic = OpenAtlasEditorLogic()
