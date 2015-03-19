@@ -96,39 +96,6 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.inputSelectorLabel.setToolTip( "Pick the input label map to the algorithm." )
     parametersFormLayout.addRow("Input Label Map Volume: ", self.inputSelectorLabel)
 
-    #
-    # input volume selector
-    #
-    self.inputSelectorPosterior = slicer.qMRMLNodeComboBox()
-    self.inputSelectorPosterior.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
-    self.inputSelectorPosterior.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "0" )
-    self.inputSelectorPosterior.selectNodeUponCreation = True
-    self.inputSelectorPosterior.addEnabled = False
-    self.inputSelectorPosterior.removeEnabled = False
-    self.inputSelectorPosterior.noneEnabled = False
-    self.inputSelectorPosterior.showHidden = False
-    self.inputSelectorPosterior.showChildNodeTypes = False
-    self.inputSelectorPosterior.setMRMLScene( slicer.mrmlScene )
-    self.inputSelectorPosterior.setToolTip( "Pick the input to the algorithm." )
-    parametersFormLayout.addRow("Posterior Volume: ", self.inputSelectorPosterior)
-    
-    #
-    # output label map selector
-    #
-    self.outputSelectorLabel = slicer.qMRMLNodeComboBox()
-    self.outputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
-    self.outputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
-    self.outputSelectorLabel.selectNodeUponCreation = True
-    self.outputSelectorLabel.addEnabled = True
-    self.outputSelectorLabel.renameEnabled = True
-    self.outputSelectorLabel.removeEnabled = True
-    self.outputSelectorLabel.noneEnabled = True
-    self.outputSelectorLabel.showHidden = False
-    self.outputSelectorLabel.showChildNodeTypes = False
-    self.outputSelectorLabel.setMRMLScene( slicer.mrmlScene )
-    self.outputSelectorLabel.setToolTip( "Pick the output label map to the algorithm." )
-    parametersFormLayout.addRow("Output Label Map Volume: ", self.outputSelectorLabel)
-
     self.targetLabel = ctk.ctkSliderWidget()
     self.targetLabel.singleStep = 1.0
     self.targetLabel.minimum = 0.0
@@ -146,6 +113,22 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
                                     'label if connected in largest region')
     parametersFormLayout.addRow("Suspicious Label: ", self.suspiciousLabel)
 
+    #
+    # input volume selector
+    #
+    self.inputSelectorPosterior = slicer.qMRMLNodeComboBox()
+    self.inputSelectorPosterior.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.inputSelectorPosterior.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "0" )
+    self.inputSelectorPosterior.selectNodeUponCreation = True
+    self.inputSelectorPosterior.addEnabled = False
+    self.inputSelectorPosterior.removeEnabled = False
+    self.inputSelectorPosterior.noneEnabled = False
+    self.inputSelectorPosterior.showHidden = False
+    self.inputSelectorPosterior.showChildNodeTypes = False
+    self.inputSelectorPosterior.setMRMLScene( slicer.mrmlScene )
+    self.inputSelectorPosterior.setToolTip( "Pick the input to the algorithm." )
+    parametersFormLayout.addRow("Posterior Volume: ", self.inputSelectorPosterior)
+
     self.posteriorThreshold = ctk.ctkSliderWidget()
     self.posteriorThreshold.singleStep = 0.01
     self.posteriorThreshold.minimum = 0.0
@@ -154,6 +137,23 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.posteriorThreshold.setToolTip('Set the threshold for the posterior image (only pixels '
                                        'above this threshold will be changed')
     parametersFormLayout.addRow("Posterior threshold for Posterior Image: ", self.posteriorThreshold)
+
+    #
+    # output label map selector
+    #
+    self.outputSelectorLabel = slicer.qMRMLNodeComboBox()
+    self.outputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.outputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
+    self.outputSelectorLabel.selectNodeUponCreation = True
+    self.outputSelectorLabel.addEnabled = True
+    self.outputSelectorLabel.renameEnabled = True
+    self.outputSelectorLabel.removeEnabled = True
+    self.outputSelectorLabel.noneEnabled = True
+    self.outputSelectorLabel.showHidden = False
+    self.outputSelectorLabel.showChildNodeTypes = False
+    self.outputSelectorLabel.setMRMLScene( slicer.mrmlScene )
+    self.outputSelectorLabel.setToolTip( "Pick the output label map to the algorithm." )
+    parametersFormLayout.addRow("Output Label Map Volume: ", self.outputSelectorLabel)
 
     # #
     # # Markups Area
