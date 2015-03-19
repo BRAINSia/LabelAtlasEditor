@@ -77,7 +77,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     parametersCollapsibleButton.text = "Parameters"
     self.layout.addWidget(parametersCollapsibleButton)
 
-    # Layout within the dummy collapsible button
+    # Layout within the Parameters Area collapsible button
     parametersFormLayout = qt.QFormLayout(parametersCollapsibleButton)
 
     #
@@ -112,6 +112,14 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.suspiciousLabel.setToolTip('Set the suspicious label (will be changed to target '
                                     'label if connected in largest region')
     parametersFormLayout.addRow("Suspicious Label: ", self.suspiciousLabel)
+
+    #
+    # check box to trigger taking screen shots for later use in tutorials
+    #
+    self.enablePosteriorCheckBox = qt.QCheckBox()
+    self.enablePosteriorCheckBox.checked = 0
+    self.enablePosteriorCheckBox.setToolTip("If checked, will use posterior image and threshold")
+    parametersFormLayout.addRow("Enable Posterior Parameters", self.enablePosteriorCheckBox)
 
     #
     # input volume selector
