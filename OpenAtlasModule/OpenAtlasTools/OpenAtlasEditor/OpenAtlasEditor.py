@@ -85,7 +85,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     #
     self.inputSelectorLabel = slicer.qMRMLNodeComboBox()
     self.inputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
-    self.inputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", 1 )
+    self.inputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
     self.inputSelectorLabel.selectNodeUponCreation = True
     self.inputSelectorLabel.addEnabled = False
     self.inputSelectorLabel.removeEnabled = False
@@ -101,7 +101,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     #
     self.inputSelector = slicer.qMRMLNodeComboBox()
     self.inputSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
-    self.inputSelector.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", 0 )
+    self.inputSelector.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "0" )
     self.inputSelector.selectNodeUponCreation = True
     self.inputSelector.addEnabled = False
     self.inputSelector.removeEnabled = False
@@ -117,60 +117,60 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     #
     self.outputSelectorLabel = slicer.qMRMLNodeComboBox()
     self.outputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
-    self.outputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", 1 )
-    self.outputSelectorLabel.selectNodeUponCreation = False
+    self.outputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
+    self.outputSelectorLabel.selectNodeUponCreation = True
     self.outputSelectorLabel.addEnabled = True
     self.outputSelectorLabel.renameEnabled = True
     self.outputSelectorLabel.removeEnabled = True
-    self.outputSelectorLabel.noneEnabled = False
+    self.outputSelectorLabel.noneEnabled = True
     self.outputSelectorLabel.showHidden = False
     self.outputSelectorLabel.showChildNodeTypes = False
     self.outputSelectorLabel.setMRMLScene( slicer.mrmlScene )
     self.outputSelectorLabel.setToolTip( "Pick the output label map to the algorithm." )
     parametersFormLayout.addRow("Output Label Map Volume: ", self.outputSelectorLabel)
 
+    # #
+    # # Markups Area
+    # #
+    # markupsCollapsibleButton = ctk.ctkCollapsibleButton()
+    # markupsCollapsibleButton.text = "Markups"
+    # self.layout.addWidget(markupsCollapsibleButton)
     #
-    # Markups Area
+    # # Layout within the dummy collapsible button
+    # markupsFormLayout = qt.QFormLayout(markupsCollapsibleButton)
     #
-    markupsCollapsibleButton = ctk.ctkCollapsibleButton()
-    markupsCollapsibleButton.text = "Markups"
-    self.layout.addWidget(markupsCollapsibleButton)
-
-    # Layout within the dummy collapsible button
-    markupsFormLayout = qt.QFormLayout(markupsCollapsibleButton)
-
+    # #
+    # # Adds the Markups widget
+    # #
+    # self.localMarkupsWidget = slicer.modules.markups.widgetRepresentation()
+    # self.localMarkupsWidget.setParent(self.parent)
+    # markupsFormLayout.addRow(self.localMarkupsWidget)
+    # self.localMarkupsWidget.show()
     #
-    # Adds the Markups widget
+    # #
+    # # Models Area
+    # #
+    # modelsCollapsibleButton = ctk.ctkCollapsibleButton()
+    # modelsCollapsibleButton.text = "Models"
+    # self.layout.addWidget(modelsCollapsibleButton)
     #
-    self.localMarkupsWidget = slicer.modules.markups.widgetRepresentation()
-    self.localMarkupsWidget.setParent(self.parent)
-    markupsFormLayout.addRow(self.localMarkupsWidget)
-    self.localMarkupsWidget.show()
-
+    # # Layout within the dummy collapsible button
+    # modelsFormLayout = qt.QFormLayout(modelsCollapsibleButton)
     #
-    # Models Area
+    # #
+    # # Adds the Models widget
+    # #
+    # self.localModelsWidget = slicer.modules.models.widgetRepresentation()
+    # self.localModelsWidget.setParent(self.parent)
+    # modelsFormLayout.addRow(self.localModelsWidget)
+    # self.localModelsWidget.show()
     #
-    modelsCollapsibleButton = ctk.ctkCollapsibleButton()
-    modelsCollapsibleButton.text = "Models"
-    self.layout.addWidget(modelsCollapsibleButton)
-
-    # Layout within the dummy collapsible button
-    modelsFormLayout = qt.QFormLayout(modelsCollapsibleButton)
-
-    #
-    # Adds the Models widget
-    #
-    self.localModelsWidget = slicer.modules.models.widgetRepresentation()
-    self.localModelsWidget.setParent(self.parent)
-    modelsFormLayout.addRow(self.localModelsWidget)
-    self.localModelsWidget.show()
-
-    #
-    # Adds the Editor Widget
-    #
-    self.localEditorWidget = Editor.EditorWidget(parent=self.parent, showVolumesFrame=False)
-    self.localEditorWidget.setup()
-    self.localEditorWidget.enter()
+    # #
+    # # Adds the Editor Widget
+    # #
+    # self.localEditorWidget = Editor.EditorWidget(parent=self.parent, showVolumesFrame=False)
+    # self.localEditorWidget.setup()
+    # self.localEditorWidget.enter()
 
     #
     # Apply Button
@@ -239,6 +239,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     self.delayDisplay('Running')
     self.mergeLabels(labelImageName, posteriorImageName, outputImageName)
+    self.assignLabelLUT(labelImageName, outputImageName)
 
     return True
 
@@ -258,6 +259,14 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     su.PushLabel(newRegion, 'newRegion')
     newLabel = self.relabel(labelImage, newRegion > 0, 24)
     su.PushLabel(newLabel, outputImageName)
+
+  def assignLabelLUT(self, labelImageName, outputImageName):
+    # Set the color lookup table (LUT) to the input label's LUT
+    inputLabelNode = slicer.util.getNode(pattern=labelImageName)
+    outputLabelNode = slicer.util.getNode(pattern=outputImageName)
+    inputLabelNodeLUTNode = inputLabelNode.GetDisplayNode().GetColorNodeID()
+    outputLabelDisplayNode = outputLabelNode.GetDisplayNode()
+    outputLabelDisplayNode.SetAndObserveColorNodeID(inputLabelNodeLUTNode)
 
 class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
   """
