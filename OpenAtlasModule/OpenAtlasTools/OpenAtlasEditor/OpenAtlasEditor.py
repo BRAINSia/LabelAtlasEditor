@@ -130,7 +130,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.inputSelectorPosterior.selectNodeUponCreation = True
     self.inputSelectorPosterior.addEnabled = False
     self.inputSelectorPosterior.removeEnabled = False
-    self.inputSelectorPosterior.noneEnabled = False
+    self.inputSelectorPosterior.noneEnabled = True
     self.inputSelectorPosterior.showHidden = False
     self.inputSelectorPosterior.showChildNodeTypes = False
     self.inputSelectorPosterior.setMRMLScene( slicer.mrmlScene )
@@ -219,6 +219,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.inputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
     self.inputSelectorPosterior.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
     self.outputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
+    self.enablePosteriorCheckBox.connect('clicked(bool)', self.onSelect)
 
     # Add vertical spacer
     self.layout.addStretch(1)
@@ -227,16 +228,21 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     pass
 
   def onSelect(self):
-    self.applyButton.enabled = self.inputSelectorLabel.currentNode() \
-                               and self.inputSelectorPosterior.currentNode() \
-                               and self.outputSelectorLabel.currentNode()
+    if not self.enablePosteriorCheckBox.checked:
+      self.applyButton.enabled = self.inputSelectorLabel.currentNode() \
+                                 and self.outputSelectorLabel.currentNode()
+    else:
+      self.applyButton.enabled = self.inputSelectorLabel.currentNode() \
+                                 and self.inputSelectorPosterior.currentNode() \
+                                 and self.outputSelectorLabel.currentNode()
 
   def onApplyButton(self):
     logic = OpenAtlasEditorLogic()
     print("Apply button selected")
     logic.run(self.inputSelectorLabel, self.inputSelectorPosterior,
               self.outputSelectorLabel, self.targetLabel.value,
-              self.suspiciousLabel.value, self.posteriorThreshold.value)
+              self.suspiciousLabel.value, self.posteriorThreshold.value,
+              self.enablePosteriorCheckBox.checked)
 
 
 #
@@ -267,7 +273,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     return True
 
   def run(self, inputSelectorLabel, inputSelectorPosterior, outputSelectorLabel,
-          targetLabel, suspiciousLabel, posteriorThreshold):
+          targetLabel, suspiciousLabel, posteriorThreshold, enablePosterior):
     """
     Run the actual algorithm
     """
@@ -275,8 +281,8 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     self.delayDisplay('Running')
     newLabel = self.mergeLabels(inputSelectorLabel.currentNode().GetName(),
                      inputSelectorPosterior.currentNode().GetName(),
-                     outputSelectorLabel.currentNode().GetName(),
-                     targetLabel, suspiciousLabel, posteriorThreshold)
+                     targetLabel, suspiciousLabel, posteriorThreshold,
+                     enablePosterior)
     outputImageName = outputSelectorLabel.currentNode().GetName()
     self.removeNode(outputImageName)
     su.PushLabel(newLabel, outputImageName)
@@ -291,13 +297,19 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
                     + sitk.Cast(newLabel * (newRegion > 0), sitk.sitkInt32)
     return newLabelImage
 
-  def mergeLabels(self, labelImageName, posteriorImageName, outputImageName, targetLabel, suspiciousLabel, posteriorThreshold):
+  def mergeLabels(self, labelImageName, posteriorImageName, targetLabel,
+                  suspiciousLabel, posteriorThreshold, enablePosterior):
     labelImage = su.PullFromSlicer(labelImageName)
     targetAndSuspiciousMergedLabel = ((labelImage == targetLabel) + (labelImage == suspiciousLabel))
-    posterior = su.PullFromSlicer(posteriorImageName)
     connectedRegion = sitk.ConnectedComponent(targetAndSuspiciousMergedLabel, True)
     relabeledConnectedRegion = sitk.RelabelComponent(connectedRegion)
-    newRegion = (relabeledConnectedRegion == 1) * (posterior > posteriorThreshold)
+    if enablePosterior:
+      posterior = su.PullFromSlicer(posteriorImageName)
+      newRegion = (relabeledConnectedRegion == 1) * (posterior > posteriorThreshold)
+      print(posteriorThreshold)
+    else:
+      newRegion = (relabeledConnectedRegion == 1)
+      print('post not enabled')
     newLabel = self.relabel(labelImage, newRegion > 0, 24)
     return newLabel
 
