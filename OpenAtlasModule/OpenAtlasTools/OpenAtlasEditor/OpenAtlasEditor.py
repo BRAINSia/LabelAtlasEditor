@@ -75,6 +75,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     #
     parametersCollapsibleButton = ctk.ctkCollapsibleButton()
     parametersCollapsibleButton.text = "Parameters"
+    parametersCollapsibleButton.setContentsMargins(10, 30, 10, 10)
     self.layout.addWidget(parametersCollapsibleButton)
 
     # Layout within the Parameters Area collapsible button
@@ -113,16 +114,31 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
                                     'label if connected in largest region')
     parametersFormLayout.addRow("Suspicious Label: ", self.suspiciousLabel)
 
+
     #
-    # check box to trigger taking screen shots for later use in tutorials
+    # Parameters Area
+    #
+    self.posteriorParametersCollapsibleButton = ctk.ctkCollapsibleButton()
+    self.posteriorParametersCollapsibleButton.text = "Posterior parameters"
+    self.posteriorParametersCollapsibleButton.collapsed = True
+    self.posteriorParametersCollapsibleButton.setContentsMargins(20, 40, 20, 20)
+    parametersFormLayout.addRow(self.posteriorParametersCollapsibleButton)
+
+    # Layout within the Parameters Area collapsible button
+    self.posteriorParametersFormLayout = qt.QFormLayout(self.posteriorParametersCollapsibleButton)
+
+    # parametersFormLayout.addRow(posteriorParametersFormLayout)
+
+    #
+    # check box to trigger using the posterior parameters
     #
     self.enablePosteriorCheckBox = qt.QCheckBox()
     self.enablePosteriorCheckBox.checked = 0
     self.enablePosteriorCheckBox.setToolTip("If checked, will use posterior image and threshold")
-    parametersFormLayout.addRow("Enable Posterior Parameters", self.enablePosteriorCheckBox)
+    self.posteriorParametersFormLayout.addRow("Enable Posterior Parameters", self.enablePosteriorCheckBox)
 
     #
-    # input volume selector
+    # input posterior volume selector
     #
     self.inputSelectorPosterior = slicer.qMRMLNodeComboBox()
     self.inputSelectorPosterior.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
@@ -136,8 +152,11 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.inputSelectorPosterior.setMRMLScene( slicer.mrmlScene )
     self.inputSelectorPosterior.setStyleSheet("color: rgb(230,241,255)")
     self.inputSelectorPosterior.setToolTip( "Pick the input to the algorithm." )
-    parametersFormLayout.addRow("Posterior Volume: ", self.inputSelectorPosterior)
+    self.posteriorParametersFormLayout.addRow("Posterior Volume: ", self.inputSelectorPosterior)
 
+    #
+    # input posterior threshold selector
+    #
     self.posteriorThreshold = ctk.ctkSliderWidget()
     self.posteriorThreshold.singleStep = 0.01
     self.posteriorThreshold.minimum = 0.0
@@ -146,7 +165,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.posteriorThreshold.setStyleSheet("color: rgb(230,241,255)")
     self.posteriorThreshold.setToolTip('Set the threshold for the posterior image (only pixels '
                                        'above this threshold will be changed')
-    parametersFormLayout.addRow("Posterior threshold for Posterior Image: ", self.posteriorThreshold)
+    self.posteriorParametersFormLayout.addRow("Posterior threshold for Posterior Image: ", self.posteriorThreshold)
 
     #
     # output label map selector
@@ -214,6 +233,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.applyButton = qt.QPushButton("Apply")
     self.applyButton.toolTip = "Run the algorithm."
     self.applyButton.enabled = False
+    self.applyButton.setStyleSheet("background-color: rgb(230,241,255)")
     parametersFormLayout.addRow(self.applyButton)
 
     # connections
