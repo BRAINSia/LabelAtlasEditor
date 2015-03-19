@@ -134,6 +134,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.inputSelectorPosterior.showHidden = False
     self.inputSelectorPosterior.showChildNodeTypes = False
     self.inputSelectorPosterior.setMRMLScene( slicer.mrmlScene )
+    self.inputSelectorPosterior.setStyleSheet("color: rgb(230,241,255)")
     self.inputSelectorPosterior.setToolTip( "Pick the input to the algorithm." )
     parametersFormLayout.addRow("Posterior Volume: ", self.inputSelectorPosterior)
 
@@ -142,6 +143,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.posteriorThreshold.minimum = 0.0
     self.posteriorThreshold.maximum = 10000.0
     self.posteriorThreshold.value = 0.1
+    self.posteriorThreshold.setStyleSheet("color: rgb(230,241,255)")
     self.posteriorThreshold.setToolTip('Set the threshold for the posterior image (only pixels '
                                        'above this threshold will be changed')
     parametersFormLayout.addRow("Posterior threshold for Posterior Image: ", self.posteriorThreshold)
@@ -219,7 +221,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.inputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
     self.inputSelectorPosterior.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
     self.outputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
-    self.enablePosteriorCheckBox.connect('clicked(bool)', self.onSelect)
+    self.enablePosteriorCheckBox.connect('clicked(bool)', self.onEnablePosteriorSelect)
 
     # Add vertical spacer
     self.layout.addStretch(1)
@@ -244,6 +246,14 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
               self.suspiciousLabel.value, self.posteriorThreshold.value,
               self.enablePosteriorCheckBox.checked)
 
+  def onEnablePosteriorSelect(self):
+    self.onSelect()
+    if not self.enablePosteriorCheckBox.checked:
+      self.inputSelectorPosterior.setStyleSheet("color: rgb(230,241,255)")
+      self.posteriorThreshold.setStyleSheet("color: rgb(230,241,255)")
+    else:
+      self.inputSelectorPosterior.setStyleSheet("color: rgb(0,0,0)")
+      self.posteriorThreshold.setStyleSheet("color: rgb(0,0,0)")
 
 #
 # OpenAtlasEditorLogic
