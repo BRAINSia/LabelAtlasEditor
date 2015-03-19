@@ -340,7 +340,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     else:
       newRegion = (relabeledConnectedRegion == 1)
       print('post not enabled')
-    newLabel = self.relabel(labelImage, newRegion > 0, 24)
+    newLabel = self.relabel(labelImage, newRegion > 0, targetLabel)
     return newLabel
 
   def assignLabelLUT(self, inputLabelNode, outputLabelNode):
