@@ -99,18 +99,18 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     #
     # input volume selector
     #
-    self.inputSelector = slicer.qMRMLNodeComboBox()
-    self.inputSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
-    self.inputSelector.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "0" )
-    self.inputSelector.selectNodeUponCreation = True
-    self.inputSelector.addEnabled = False
-    self.inputSelector.removeEnabled = False
-    self.inputSelector.noneEnabled = False
-    self.inputSelector.showHidden = False
-    self.inputSelector.showChildNodeTypes = False
-    self.inputSelector.setMRMLScene( slicer.mrmlScene )
-    self.inputSelector.setToolTip( "Pick the input to the algorithm." )
-    parametersFormLayout.addRow("Input Volume: ", self.inputSelector)
+    self.inputSelectorPosterior = slicer.qMRMLNodeComboBox()
+    self.inputSelectorPosterior.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.inputSelectorPosterior.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "0" )
+    self.inputSelectorPosterior.selectNodeUponCreation = True
+    self.inputSelectorPosterior.addEnabled = False
+    self.inputSelectorPosterior.removeEnabled = False
+    self.inputSelectorPosterior.noneEnabled = False
+    self.inputSelectorPosterior.showHidden = False
+    self.inputSelectorPosterior.showChildNodeTypes = False
+    self.inputSelectorPosterior.setMRMLScene( slicer.mrmlScene )
+    self.inputSelectorPosterior.setToolTip( "Pick the input to the algorithm." )
+    parametersFormLayout.addRow("Posterior Volume: ", self.inputSelectorPosterior)
     
     #
     # output label map selector
@@ -209,7 +209,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     # connections
     self.applyButton.connect('clicked(bool)', self.onApplyButton)
     self.inputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
-    self.inputSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
+    self.inputSelectorPosterior.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
     self.outputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
 
     # Add vertical spacer
@@ -220,13 +220,13 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
 
   def onSelect(self):
     self.applyButton.enabled = self.inputSelectorLabel.currentNode() \
-                               and self.inputSelector.currentNode() \
+                               and self.inputSelectorPosterior.currentNode() \
                                and self.outputSelectorLabel.currentNode()
 
   def onApplyButton(self):
     logic = OpenAtlasEditorLogic()
     print("Apply button selected")
-    logic.run(self.inputSelectorLabel, self.inputSelector,
+    logic.run(self.inputSelectorLabel, self.inputSelectorPosterior,
               self.outputSelectorLabel, self.targetLabel.value,
               self.suspiciousLabel.value, self.posteriorThreshold.value)
 
