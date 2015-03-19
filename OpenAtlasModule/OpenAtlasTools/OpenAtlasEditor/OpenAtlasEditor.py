@@ -251,13 +251,12 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
   def mergeLabels(self, labelImageName, posteriorImageName, outputImageName, regionLabel=24, testLabel=999, threshold=0.1):
     labelImage = su.PullFromSlicer(labelImageName)
     region_999 = ((labelImage == regionLabel) + (labelImage == testLabel))
-    su.PushLabel(region_999, 'region_999')
     posterior = su.PullFromSlicer(posteriorImageName)
     connectedRegion = sitk.ConnectedComponent(region_999, True)
     relabeledConnectedRegion = sitk.RelabelComponent(connectedRegion)
     newRegion = (relabeledConnectedRegion == 1) * (posterior > threshold)
-    su.PushLabel(newRegion, 'newRegion')
     newLabel = self.relabel(labelImage, newRegion > 0, 24)
+    self.removeNode(outputImageName)
     su.PushLabel(newLabel, outputImageName)
 
   def assignLabelLUT(self, labelImageName, outputImageName):
@@ -267,6 +266,10 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     inputLabelNodeLUTNode = inputLabelNode.GetDisplayNode().GetColorNodeID()
     outputLabelDisplayNode = outputLabelNode.GetDisplayNode()
     outputLabelDisplayNode.SetAndObserveColorNodeID(inputLabelNodeLUTNode)
+
+  def removeNode(self, nodeName):
+    node = slicer.util.getNode(pattern=nodeName)
+    slicer.mrmlScene.RemoveNode(node)
 
 class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
   """
