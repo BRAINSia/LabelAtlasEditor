@@ -200,9 +200,8 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
   def onApplyButton(self):
     logic = OpenAtlasEditorLogic()
     print("Apply button selected")
-    logic.run(self.inputSelectorLabel.currentNode().GetName(),
-              self.inputSelector.currentNode().GetName(),
-              self.outputSelectorLabel.currentNode().GetName())
+    logic.run(self.inputSelectorLabel, self.inputSelector,
+              self.outputSelectorLabel)
 
 
 #
@@ -232,14 +231,21 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       return False
     return True
 
-  def run(self, labelImageName, posteriorImageName, outputImageName):
+  def run(self, inputSelectorLabel, inputSelectorPosterior, outputSelectorLabel):
     """
     Run the actual algorithm
     """
 
     self.delayDisplay('Running')
-    self.mergeLabels(labelImageName, posteriorImageName, outputImageName)
-    self.assignLabelLUT(labelImageName, outputImageName)
+    newLabel = self.mergeLabels(inputSelectorLabel.currentNode().GetName(),
+                     inputSelectorPosterior.currentNode().GetName(),
+                     outputSelectorLabel.currentNode().GetName())
+    outputImageName = outputSelectorLabel.currentNode().GetName()
+    self.removeNode(outputImageName)
+    su.PushLabel(newLabel, outputImageName)
+    self.setComboBoxNode(outputSelectorLabel, outputImageName)
+    self.assignLabelLUT(inputSelectorLabel.currentNode(),
+                        outputSelectorLabel.currentNode())
 
     return True
 
@@ -256,13 +262,10 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     relabeledConnectedRegion = sitk.RelabelComponent(connectedRegion)
     newRegion = (relabeledConnectedRegion == 1) * (posterior > threshold)
     newLabel = self.relabel(labelImage, newRegion > 0, 24)
-    self.removeNode(outputImageName)
-    su.PushLabel(newLabel, outputImageName)
+    return newLabel
 
-  def assignLabelLUT(self, labelImageName, outputImageName):
+  def assignLabelLUT(self, inputLabelNode, outputLabelNode):
     # Set the color lookup table (LUT) to the input label's LUT
-    inputLabelNode = slicer.util.getNode(pattern=labelImageName)
-    outputLabelNode = slicer.util.getNode(pattern=outputImageName)
     inputLabelNodeLUTNode = inputLabelNode.GetDisplayNode().GetColorNodeID()
     outputLabelDisplayNode = outputLabelNode.GetDisplayNode()
     outputLabelDisplayNode.SetAndObserveColorNodeID(inputLabelNodeLUTNode)
@@ -270,6 +273,10 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
   def removeNode(self, nodeName):
     node = slicer.util.getNode(pattern=nodeName)
     slicer.mrmlScene.RemoveNode(node)
+
+  def setComboBoxNode(self, selector, nodeName):
+    newNode = slicer.util.getNode(pattern=nodeName)
+    selector.setCurrentNode(newNode)
 
 class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
   """
