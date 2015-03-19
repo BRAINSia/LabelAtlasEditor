@@ -129,6 +129,32 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.outputSelectorLabel.setToolTip( "Pick the output label map to the algorithm." )
     parametersFormLayout.addRow("Output Label Map Volume: ", self.outputSelectorLabel)
 
+    self.targetLabel = ctk.ctkSliderWidget()
+    self.targetLabel.singleStep = 1.0
+    self.targetLabel.minimum = 0.0
+    self.targetLabel.maximum = 10000.0
+    self.targetLabel.value = 24.0
+    self.targetLabel.setToolTip('Set the target label (label to change suspicious label to)')
+    parametersFormLayout.addRow("Target Label: ", self.targetLabel)
+    
+    self.suspiciousLabel = ctk.ctkSliderWidget()
+    self.suspiciousLabel.singleStep = 1.0
+    self.suspiciousLabel.minimum = 0.0
+    self.suspiciousLabel.maximum = 10000.0
+    self.suspiciousLabel.value = 999.0
+    self.suspiciousLabel.setToolTip('Set the suspicious label (will be changed to target '
+                                    'label if connected in largest region')
+    parametersFormLayout.addRow("Suspicious Label: ", self.suspiciousLabel)
+
+    self.posteriorThreshold = ctk.ctkSliderWidget()
+    self.posteriorThreshold.singleStep = 0.01
+    self.posteriorThreshold.minimum = 0.0
+    self.posteriorThreshold.maximum = 10000.0
+    self.posteriorThreshold.value = 0.1
+    self.posteriorThreshold.setToolTip('Set the threshold for the posterior image (only pixels '
+                                       'above this threshold will be changed')
+    parametersFormLayout.addRow("Posterior threshold for Posterior Image: ", self.posteriorThreshold)
+
     # #
     # # Markups Area
     # #
@@ -201,7 +227,8 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     logic = OpenAtlasEditorLogic()
     print("Apply button selected")
     logic.run(self.inputSelectorLabel, self.inputSelector,
-              self.outputSelectorLabel)
+              self.outputSelectorLabel, self.targetLabel.value,
+              self.suspiciousLabel.value, self.posteriorThreshold.value)
 
 
 #
@@ -231,7 +258,8 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       return False
     return True
 
-  def run(self, inputSelectorLabel, inputSelectorPosterior, outputSelectorLabel):
+  def run(self, inputSelectorLabel, inputSelectorPosterior, outputSelectorLabel,
+          targetLabel, suspiciousLabel, posteriorThreshold):
     """
     Run the actual algorithm
     """
@@ -239,7 +267,8 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     self.delayDisplay('Running')
     newLabel = self.mergeLabels(inputSelectorLabel.currentNode().GetName(),
                      inputSelectorPosterior.currentNode().GetName(),
-                     outputSelectorLabel.currentNode().GetName())
+                     outputSelectorLabel.currentNode().GetName(),
+                     targetLabel, suspiciousLabel, posteriorThreshold)
     outputImageName = outputSelectorLabel.currentNode().GetName()
     self.removeNode(outputImageName)
     su.PushLabel(newLabel, outputImageName)
@@ -254,13 +283,13 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
                     + sitk.Cast(newLabel * (newRegion > 0), sitk.sitkInt32)
     return newLabelImage
 
-  def mergeLabels(self, labelImageName, posteriorImageName, outputImageName, regionLabel=24, testLabel=999, threshold=0.1):
+  def mergeLabels(self, labelImageName, posteriorImageName, outputImageName, targetLabel, suspiciousLabel, posteriorThreshold):
     labelImage = su.PullFromSlicer(labelImageName)
-    region_999 = ((labelImage == regionLabel) + (labelImage == testLabel))
+    targetAndSuspiciousMergedLabel = ((labelImage == targetLabel) + (labelImage == suspiciousLabel))
     posterior = su.PullFromSlicer(posteriorImageName)
-    connectedRegion = sitk.ConnectedComponent(region_999, True)
+    connectedRegion = sitk.ConnectedComponent(targetAndSuspiciousMergedLabel, True)
     relabeledConnectedRegion = sitk.RelabelComponent(connectedRegion)
-    newRegion = (relabeledConnectedRegion == 1) * (posterior > threshold)
+    newRegion = (relabeledConnectedRegion == 1) * (posterior > posteriorThreshold)
     newLabel = self.relabel(labelImage, newRegion > 0, 24)
     return newLabel
 
