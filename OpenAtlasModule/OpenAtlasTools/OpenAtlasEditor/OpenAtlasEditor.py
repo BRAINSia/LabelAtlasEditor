@@ -309,10 +309,13 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     """
 
     self.delayDisplay('Running')
-    newLabel = self.mergeLabels(inputSelectorLabel.currentNode().GetName(),
-                     inputSelectorPosterior.currentNode().GetName(),
-                     targetLabel, suspiciousLabel, posteriorThreshold,
-                     enablePosterior)
+    if not enablePosterior:
+      newLabel = self.mergeLabels(inputSelectorLabel.currentNode().GetName(),
+                                  targetLabel, suspiciousLabel)
+    else:
+      newLabel = self.mergeLabels(inputSelectorLabel.currentNode().GetName(),
+                                  targetLabel, suspiciousLabel, True,
+                                  posteriorThreshold, inputSelectorPosterior)
     outputImageName = outputSelectorLabel.currentNode().GetName()
     self.removeNode(outputImageName)
     su.PushLabel(newLabel, outputImageName)
@@ -327,19 +330,17 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
                     + sitk.Cast(newLabel * (newRegion > 0), sitk.sitkInt32)
     return newLabelImage
 
-  def mergeLabels(self, labelImageName, posteriorImageName, targetLabel,
-                  suspiciousLabel, posteriorThreshold, enablePosterior):
+  def mergeLabels(self, labelImageName, targetLabel, suspiciousLabel,
+                  enablePosterior=False, posteriorThreshold=None, posteriorNode=None):
     labelImage = su.PullFromSlicer(labelImageName)
     targetAndSuspiciousMergedLabel = ((labelImage == targetLabel) + (labelImage == suspiciousLabel))
     connectedRegion = sitk.ConnectedComponent(targetAndSuspiciousMergedLabel, True)
     relabeledConnectedRegion = sitk.RelabelComponent(connectedRegion)
-    if enablePosterior:
-      posterior = su.PullFromSlicer(posteriorImageName)
-      newRegion = (relabeledConnectedRegion == 1) * (posterior > posteriorThreshold)
-      print(posteriorThreshold)
-    else:
+    if not enablePosterior:
       newRegion = (relabeledConnectedRegion == 1)
-      print('post not enabled')
+    else:
+      posterior = su.PullFromSlicer(posteriorNode.currentNode().GetName())
+      newRegion = (relabeledConnectedRegion == 1) * (posterior > posteriorThreshold)
     newLabel = self.relabel(labelImage, newRegion > 0, targetLabel)
     return newLabel
 
