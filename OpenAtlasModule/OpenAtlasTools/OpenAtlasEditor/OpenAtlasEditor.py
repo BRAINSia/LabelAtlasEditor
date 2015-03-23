@@ -373,19 +373,20 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     """
 
     self.delayDisplay('Running')
+    inputLabelName = inputSelectorLabel.currentNode().GetName()
     if not enablePosterior:
-      newLabel = self.mergeLabels(inputSelectorLabel.currentNode().GetName(),
-                                  targetLabel, suspiciousLabel)
+      newLabel = self.mergeLabels(inputLabelName, targetLabel, suspiciousLabel)
     else:
-      newLabel = self.mergeLabels(inputSelectorLabel.currentNode().GetName(),
-                                  targetLabel, suspiciousLabel, True,
-                                  posteriorThreshold, inputSelectorPosterior)
-    outputImageName = outputSelectorLabel.currentNode().GetName()
-    self.removeNode(outputImageName)
-    su.PushLabel(newLabel, outputImageName)
-    self.setComboBoxNode(outputSelectorLabel, outputImageName)
-    self.assignLabelLUT(inputSelectorLabel.currentNode(),
-                        outputSelectorLabel.currentNode())
+      newLabel = self.mergeLabels(inputLabelName, targetLabel, suspiciousLabel,
+                                  True, posteriorThreshold, inputSelectorPosterior)
+
+    inputNode = slicer.util.getNode(pattern=inputLabelName)
+    inputLabelNodeLUTNodeID = inputNode.GetDisplayNode().GetColorNodeID()
+
+    outputLabelName = outputSelectorLabel.currentNode().GetName()
+    su.PushLabel(newLabel, outputLabelName, overwrite=True)
+    self.setLabelLUT(outputLabelName, inputLabelNodeLUTNodeID)
+    # self.setComboBoxNode(outputSelectorLabel, outputImageName)
 
     return True
 
@@ -408,20 +409,10 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     newLabel = self.relabel(labelImage, newRegion > 0, targetLabel)
     return newLabel
 
-  def assignLabelLUT(self, inputLabelNode, outputLabelNode):
-    # Set the color lookup table (LUT) to the input label's LUT
-    inputLabelNodeLUTNode = inputLabelNode.GetDisplayNode().GetColorNodeID()
-    outputLabelDisplayNode = outputLabelNode.GetDisplayNode()
-    outputLabelDisplayNode.SetAndObserveColorNodeID(inputLabelNodeLUTNode)
-
   def setLabelLUT(self, nodeName, colorNodeID):
     outputNode = slicer.util.getNode(pattern=nodeName)
     outputLabelDisplayNode = outputNode.GetDisplayNode()
     outputLabelDisplayNode.SetAndObserveColorNodeID(colorNodeID)
-
-  def removeNode(self, nodeName):
-    node = slicer.util.getNode(pattern=nodeName)
-    slicer.mrmlScene.RemoveNode(node)
 
   def setComboBoxNode(self, selector, nodeName):
     newNode = slicer.util.getNode(pattern=nodeName)
