@@ -82,6 +82,22 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     castParametersFormLayout = qt.QFormLayout(castParametersCollapsibleButton)
 
     #
+    # input label map selector
+    #
+    self.inputCastSelectorLabel = slicer.qMRMLNodeComboBox()
+    self.inputCastSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.inputCastSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
+    self.inputCastSelectorLabel.selectNodeUponCreation = True
+    self.inputCastSelectorLabel.addEnabled = False
+    self.inputCastSelectorLabel.removeEnabled = False
+    self.inputCastSelectorLabel.noneEnabled = False
+    self.inputCastSelectorLabel.showHidden = False
+    self.inputCastSelectorLabel.showChildNodeTypes = False
+    self.inputCastSelectorLabel.setMRMLScene( slicer.mrmlScene )
+    self.inputCastSelectorLabel.setToolTip( "Pick the input label map to the algorithm." )
+    castParametersFormLayout.addRow("Input Label Map Volume: ", self.inputCastSelectorLabel)
+
+    #
     # Merge Suspicious Label to Target Label Parameters Area
     #
     parametersCollapsibleButton = ctk.ctkCollapsibleButton()
