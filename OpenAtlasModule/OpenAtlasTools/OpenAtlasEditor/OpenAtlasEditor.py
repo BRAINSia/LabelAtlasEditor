@@ -340,7 +340,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       newRegion = (relabeledConnectedRegion == 1)
     else:
       posterior = su.PullFromSlicer(posteriorNode.currentNode().GetName())
-      newRegion = (relabeledConnectedRegion == 1) * (posterior > posteriorThreshold)
+      newRegion = (relabeledConnectedRegion == 1) * (posterior >= posteriorThreshold)
     newLabel = self.relabel(labelImage, newRegion > 0, targetLabel)
     return newLabel
 
