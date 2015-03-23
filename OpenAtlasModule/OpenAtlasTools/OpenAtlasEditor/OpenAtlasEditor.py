@@ -115,6 +115,15 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     castParametersFormLayout.addRow("Output Label Map Volume: ", self.outputCastLabelSelector)
 
     #
+    # Cast Apply Button
+    #
+    self.castApplyButton = qt.QPushButton("Apply")
+    self.castApplyButton.toolTip = "Run the algorithm."
+    self.castApplyButton.enabled = False
+    self.castApplyButton.setStyleSheet("background-color: rgb(230,241,255)")
+    castParametersFormLayout.addRow(self.castApplyButton)
+
+    #
     # Merge Suspicious Label to Target Label Parameters Area
     #
     parametersCollapsibleButton = ctk.ctkCollapsibleButton()
@@ -157,7 +166,6 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.suspiciousLabel.setToolTip('Set the suspicious label (will be changed to target '
                                     'label if connected in largest region')
     parametersFormLayout.addRow("Suspicious Label: ", self.suspiciousLabel)
-
 
     #
     # Posterior Parameters Area
@@ -267,7 +275,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     #
     # Adds the Editor Widget
     #
-    self.localEditorWidget = Editor.EditorWidget(parent=self.parent, showVolumesFrame=True)
+    self.localEditorWidget = Editor.EditorWidget(parent=self.parent, showVolumesFrame=False)
     self.localEditorWidget.setup()
     self.localEditorWidget.enter()
 
@@ -281,6 +289,9 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     parametersFormLayout.addRow(self.applyButton)
 
     # connections
+    self.castApplyButton.connect('clicked(bool)', self.onCastApplyButton)
+    self.inputCastLabelSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onCastSelect)
+    self.outputCastLabelSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onCastSelect)
     self.applyButton.connect('clicked(bool)', self.onApplyButton)
     self.inputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
     self.inputSelectorPosterior.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
@@ -293,6 +304,10 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
   def cleanup(self):
     pass
 
+  def onCastSelect(self):
+    self.castApplyButton.enabled = self.inputCastLabelSelector.currentNode() \
+                                   and self.outputCastLabelSelector.currentNode()
+
   def onSelect(self):
     if not self.enablePosteriorCheckBox.checked:
       self.applyButton.enabled = self.inputSelectorLabel.currentNode() \
@@ -301,6 +316,11 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
       self.applyButton.enabled = self.inputSelectorLabel.currentNode() \
                                  and self.inputSelectorPosterior.currentNode() \
                                  and self.outputSelectorLabel.currentNode()
+
+  def onCastApplyButton(self):
+    logic = OpenAtlasEditorLogic()
+    logic.runCast(self.inputCastLabelSelector.currentNode(),
+                  self.outputCastLabelSelector.currentNode())
 
   def onApplyButton(self):
     logic = OpenAtlasEditorLogic()
