@@ -422,6 +422,17 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     newNode = slicer.util.getNode(pattern=nodeName)
     selector.setCurrentNode(newNode)
 
+  def runCast(self, inputNode, outputNode):
+    inputName = inputNode.GetName()
+    inputImage = su.PullFromSlicer(inputName)
+    outputImage = sitk.Cast(inputImage, sitk.sitkInt16)
+    inputLabelNodeLUTNodeID = inputNode.GetDisplayNode().GetColorNodeID()
+    outputName = outputNode.GetName()
+    su.PushLabel(outputImage, outputName, overwrite=True)
+    outputNode = slicer.util.getNode(pattern=outputName)
+    outputLabelDisplayNode = outputNode.GetDisplayNode()
+    outputLabelDisplayNode.SetAndObserveColorNodeID(inputLabelNodeLUTNodeID)
+
 class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
   """
   This is the test case for your scripted module.
