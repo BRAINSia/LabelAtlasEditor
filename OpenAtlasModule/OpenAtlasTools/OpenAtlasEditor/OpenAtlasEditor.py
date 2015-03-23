@@ -324,13 +324,20 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
 
   def onApplyButton(self):
     logic = OpenAtlasEditorLogic()
-    print("Apply button selected")
-    logic.run(self.inputSelectorLabel.currentNode().GetName(),
-              self.inputSelectorPosterior.currentNode().GetName(),
+
+    print("Merge Apply button selected")
+
+    if not self.enablePosteriorCheckBox.checked:
+      logic.run(self.inputSelectorLabel.currentNode().GetName(),
+              self.outputSelectorLabel.currentNode().GetName(),
+              self.targetLabel.value, self.suspiciousLabel.value)
+    else:
+      logic.run(self.inputSelectorLabel.currentNode().GetName(),
               self.outputSelectorLabel.currentNode().GetName(),
               self.targetLabel.value, self.suspiciousLabel.value,
-              self.posteriorThreshold.value,
-              self.enablePosteriorCheckBox.checked)
+              enablePosterior=True,
+              inputPosteriorName=self.inputSelectorPosterior.currentNode().GetName(),
+              posteriorThreshold=self.posteriorThreshold.value)
 
   def onEnablePosteriorSelect(self):
     self.onSelect()
@@ -368,19 +375,16 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       return False
     return True
 
-  def run(self, inputLabelName, inputPosteriorName, outputLabelName,
-          targetLabel, suspiciousLabel, posteriorThreshold, enablePosterior):
+  def run(self, inputLabelName, outputLabelName, targetLabel, suspiciousLabel,
+          enablePosterior=False, inputPosteriorName=None, posteriorThreshold=None):
     """
     Run the actual algorithm
     """
 
     self.delayDisplay('Running')
 
-    if not enablePosterior:
-      newLabel = self.mergeLabels(inputLabelName, targetLabel, suspiciousLabel)
-    else:
-      newLabel = self.mergeLabels(inputLabelName, targetLabel, suspiciousLabel,
-                                  True, posteriorThreshold, inputPosteriorName)
+    newLabel = self.mergeLabels(inputLabelName, targetLabel, suspiciousLabel,
+                                enablePosterior, inputPosteriorName, posteriorThreshold)
 
     inputNode = slicer.util.getNode(pattern=inputLabelName)
     inputLabelNodeLUTNodeID = inputNode.GetDisplayNode().GetColorNodeID()
@@ -393,18 +397,21 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
   def relabel(self, labelImage, newRegion, newLabel):
     newLabelImage = sitk.Cast(labelImage, sitk.sitkInt32) * sitk.Cast((newRegion == 0), sitk.sitkInt32) \
                     + sitk.Cast(newLabel * (newRegion > 0), sitk.sitkInt32)
+    newLabelImage = sitk.Cast(newLabelImage, sitk.sitkInt16)
     return newLabelImage
 
   def mergeLabels(self, labelImageName, targetLabel, suspiciousLabel,
-                  enablePosterior=False, posteriorThreshold=None, posteriorName=None):
+                  enablePosterior, inputPosteriorName, posteriorThreshold):
     labelImage = su.PullFromSlicer(labelImageName)
     targetAndSuspiciousMergedLabel = ((labelImage == targetLabel) + (labelImage == suspiciousLabel))
     connectedRegion = sitk.ConnectedComponent(targetAndSuspiciousMergedLabel, True)
     relabeledConnectedRegion = sitk.RelabelComponent(connectedRegion)
     if not enablePosterior:
       newRegion = (relabeledConnectedRegion == 1)
+      print('no thresh used')
     else:
-      posterior = su.PullFromSlicer(posteriorName)
+      print('threshold used: ', posteriorThreshold)
+      posterior = su.PullFromSlicer(inputPosteriorName)
       newRegion = (relabeledConnectedRegion == 1) * (posterior >= posteriorThreshold)
     newLabel = self.relabel(labelImage, newRegion > 0, targetLabel)
     return newLabel
