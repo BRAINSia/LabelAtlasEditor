@@ -397,8 +397,8 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
   def relabel(self, labelImage, newRegion, newLabel):
     newLabelImage = sitk.Cast(labelImage, sitk.sitkInt32) * sitk.Cast((newRegion == 0), sitk.sitkInt32) \
                     + sitk.Cast(newLabel * (newRegion > 0), sitk.sitkInt32)
-    newLabelImage = sitk.Cast(newLabelImage, sitk.sitkInt16)
-    return newLabelImage
+    newCastedLabelImage = sitk.Cast(newLabelImage, sitk.sitkInt16)
+    return newCastedLabelImage
 
   def mergeLabels(self, labelImageName, targetLabel, suspiciousLabel,
                   enablePosterior, inputPosteriorName, posteriorThreshold):
@@ -412,7 +412,8 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     else:
       print('threshold used: ', posteriorThreshold)
       posterior = su.PullFromSlicer(inputPosteriorName)
-      newRegion = (relabeledConnectedRegion == 1) * (posterior >= posteriorThreshold)
+      thresholdedPosterior = sitk.BinaryThreshold(posterior, posteriorThreshold)
+      newRegion = (relabeledConnectedRegion == 1) * thresholdedPosterior
     newLabel = self.relabel(labelImage, newRegion > 0, targetLabel)
     return newLabel
 
