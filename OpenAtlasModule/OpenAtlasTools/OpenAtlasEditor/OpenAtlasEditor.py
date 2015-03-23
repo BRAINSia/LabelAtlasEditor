@@ -325,9 +325,11 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
   def onApplyButton(self):
     logic = OpenAtlasEditorLogic()
     print("Apply button selected")
-    logic.run(self.inputSelectorLabel, self.inputSelectorPosterior,
-              self.outputSelectorLabel, self.targetLabel.value,
-              self.suspiciousLabel.value, self.posteriorThreshold.value,
+    logic.run(self.inputSelectorLabel.currentNode().GetName(),
+              self.inputSelectorPosterior.currentNode().GetName(),
+              self.outputSelectorLabel.currentNode().GetName(),
+              self.targetLabel.value, self.suspiciousLabel.value,
+              self.posteriorThreshold.value,
               self.enablePosteriorCheckBox.checked)
 
   def onEnablePosteriorSelect(self):
@@ -366,24 +368,23 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       return False
     return True
 
-  def run(self, inputSelectorLabel, inputSelectorPosterior, outputSelectorLabel,
+  def run(self, inputLabelName, inputPosteriorName, outputLabelName,
           targetLabel, suspiciousLabel, posteriorThreshold, enablePosterior):
     """
     Run the actual algorithm
     """
 
     self.delayDisplay('Running')
-    inputLabelName = inputSelectorLabel.currentNode().GetName()
+
     if not enablePosterior:
       newLabel = self.mergeLabels(inputLabelName, targetLabel, suspiciousLabel)
     else:
       newLabel = self.mergeLabels(inputLabelName, targetLabel, suspiciousLabel,
-                                  True, posteriorThreshold, inputSelectorPosterior)
+                                  True, posteriorThreshold, inputPosteriorName)
 
     inputNode = slicer.util.getNode(pattern=inputLabelName)
     inputLabelNodeLUTNodeID = inputNode.GetDisplayNode().GetColorNodeID()
 
-    outputLabelName = outputSelectorLabel.currentNode().GetName()
     su.PushLabel(newLabel, outputLabelName, overwrite=True)
     self.setLabelLUT(outputLabelName, inputLabelNodeLUTNodeID)
 
@@ -395,7 +396,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     return newLabelImage
 
   def mergeLabels(self, labelImageName, targetLabel, suspiciousLabel,
-                  enablePosterior=False, posteriorThreshold=None, posteriorNode=None):
+                  enablePosterior=False, posteriorThreshold=None, posteriorName=None):
     labelImage = su.PullFromSlicer(labelImageName)
     targetAndSuspiciousMergedLabel = ((labelImage == targetLabel) + (labelImage == suspiciousLabel))
     connectedRegion = sitk.ConnectedComponent(targetAndSuspiciousMergedLabel, True)
@@ -403,7 +404,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     if not enablePosterior:
       newRegion = (relabeledConnectedRegion == 1)
     else:
-      posterior = su.PullFromSlicer(posteriorNode.currentNode().GetName())
+      posterior = su.PullFromSlicer(posteriorName)
       newRegion = (relabeledConnectedRegion == 1) * (posterior >= posteriorThreshold)
     newLabel = self.relabel(labelImage, newRegion > 0, targetLabel)
     return newLabel
@@ -421,6 +422,8 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     outputName = outputNode.GetName()
     su.PushLabel(outputImage, outputName, overwrite=True)
     self.setLabelLUT(outputName, inputLabelNodeLUTNodeID)
+
+    return True
 
 class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
   """
