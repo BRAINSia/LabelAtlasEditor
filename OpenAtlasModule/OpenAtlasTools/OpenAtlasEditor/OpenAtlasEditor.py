@@ -386,7 +386,6 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     outputLabelName = outputSelectorLabel.currentNode().GetName()
     su.PushLabel(newLabel, outputLabelName, overwrite=True)
     self.setLabelLUT(outputLabelName, inputLabelNodeLUTNodeID)
-    # self.setComboBoxNode(outputSelectorLabel, outputImageName)
 
     return True
 
@@ -413,10 +412,6 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     outputNode = slicer.util.getNode(pattern=nodeName)
     outputLabelDisplayNode = outputNode.GetDisplayNode()
     outputLabelDisplayNode.SetAndObserveColorNodeID(colorNodeID)
-
-  def setComboBoxNode(self, selector, nodeName):
-    newNode = slicer.util.getNode(pattern=nodeName)
-    selector.setCurrentNode(newNode)
 
   def runCast(self, inputNode, outputNode):
     inputName = inputNode.GetName()
