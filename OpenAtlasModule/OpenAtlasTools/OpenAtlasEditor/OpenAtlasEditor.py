@@ -71,10 +71,21 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
         self.reloadAndTestButton.connect('clicked()', self.onReloadAndTest)
 
     #
-    # Parameters Area
+    # Cast Label Map to Signed 16-bit Parameters Area
+    #
+    castParametersCollapsibleButton = ctk.ctkCollapsibleButton()
+    castParametersCollapsibleButton.text = "Cast Label Map to Signed 16-bit for use in Editor Parameters"
+    castParametersCollapsibleButton.setContentsMargins(10, 30, 10, 10)
+    self.layout.addWidget(castParametersCollapsibleButton)
+
+    # Layout within the Cast Label Map Parameters Area collapsible button
+    castParametersFormLayout = qt.QFormLayout(castParametersCollapsibleButton)
+
+    #
+    # Merge Suspicious Label to Target Label Parameters Area
     #
     parametersCollapsibleButton = ctk.ctkCollapsibleButton()
-    parametersCollapsibleButton.text = "Parameters"
+    parametersCollapsibleButton.text = "Merge Suspicious Label to Target Label Parameters"
     parametersCollapsibleButton.setContentsMargins(10, 30, 10, 10)
     self.layout.addWidget(parametersCollapsibleButton)
 
@@ -116,7 +127,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
 
 
     #
-    # Parameters Area
+    # Posterior Parameters Area
     #
     self.posteriorParametersCollapsibleButton = ctk.ctkCollapsibleButton()
     self.posteriorParametersCollapsibleButton.text = "Posterior parameters"
