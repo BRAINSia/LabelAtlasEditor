@@ -84,18 +84,35 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     #
     # input label map selector
     #
-    self.inputCastSelectorLabel = slicer.qMRMLNodeComboBox()
-    self.inputCastSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
-    self.inputCastSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
-    self.inputCastSelectorLabel.selectNodeUponCreation = True
-    self.inputCastSelectorLabel.addEnabled = False
-    self.inputCastSelectorLabel.removeEnabled = False
-    self.inputCastSelectorLabel.noneEnabled = False
-    self.inputCastSelectorLabel.showHidden = False
-    self.inputCastSelectorLabel.showChildNodeTypes = False
-    self.inputCastSelectorLabel.setMRMLScene( slicer.mrmlScene )
-    self.inputCastSelectorLabel.setToolTip( "Pick the input label map to the algorithm." )
-    castParametersFormLayout.addRow("Input Label Map Volume: ", self.inputCastSelectorLabel)
+    self.inputCastLabelSelector = slicer.qMRMLNodeComboBox()
+    self.inputCastLabelSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.inputCastLabelSelector.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
+    self.inputCastLabelSelector.selectNodeUponCreation = True
+    self.inputCastLabelSelector.addEnabled = False
+    self.inputCastLabelSelector.removeEnabled = False
+    self.inputCastLabelSelector.noneEnabled = False
+    self.inputCastLabelSelector.showHidden = False
+    self.inputCastLabelSelector.showChildNodeTypes = False
+    self.inputCastLabelSelector.setMRMLScene( slicer.mrmlScene )
+    self.inputCastLabelSelector.setToolTip( "Pick the input label map to the algorithm." )
+    castParametersFormLayout.addRow("Input Label Map Volume: ", self.inputCastLabelSelector)
+    
+    #
+    # output label map selector
+    #
+    self.outputCastLabelSelector = slicer.qMRMLNodeComboBox()
+    self.outputCastLabelSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.outputCastLabelSelector.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
+    self.outputCastLabelSelector.selectNodeUponCreation = True
+    self.outputCastLabelSelector.addEnabled = True
+    self.outputCastLabelSelector.renameEnabled = True
+    self.outputCastLabelSelector.removeEnabled = True
+    self.outputCastLabelSelector.noneEnabled = True
+    self.outputCastLabelSelector.showHidden = False
+    self.outputCastLabelSelector.showChildNodeTypes = False
+    self.outputCastLabelSelector.setMRMLScene( slicer.mrmlScene )
+    self.outputCastLabelSelector.setToolTip( "Pick the output label map to the algorithm." )
+    castParametersFormLayout.addRow("Output Label Map Volume: ", self.outputCastLabelSelector)
 
     #
     # Merge Suspicious Label to Target Label Parameters Area
