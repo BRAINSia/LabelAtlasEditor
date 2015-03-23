@@ -414,6 +414,11 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     outputLabelDisplayNode = outputLabelNode.GetDisplayNode()
     outputLabelDisplayNode.SetAndObserveColorNodeID(inputLabelNodeLUTNode)
 
+  def setLabelLUT(self, nodeName, colorNodeID):
+    outputNode = slicer.util.getNode(pattern=nodeName)
+    outputLabelDisplayNode = outputNode.GetDisplayNode()
+    outputLabelDisplayNode.SetAndObserveColorNodeID(colorNodeID)
+
   def removeNode(self, nodeName):
     node = slicer.util.getNode(pattern=nodeName)
     slicer.mrmlScene.RemoveNode(node)
@@ -429,9 +434,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     inputLabelNodeLUTNodeID = inputNode.GetDisplayNode().GetColorNodeID()
     outputName = outputNode.GetName()
     su.PushLabel(outputImage, outputName, overwrite=True)
-    outputNode = slicer.util.getNode(pattern=outputName)
-    outputLabelDisplayNode = outputNode.GetDisplayNode()
-    outputLabelDisplayNode.SetAndObserveColorNodeID(inputLabelNodeLUTNodeID)
+    self.setLabelLUT(outputName, inputLabelNodeLUTNodeID)
 
 class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
   """
