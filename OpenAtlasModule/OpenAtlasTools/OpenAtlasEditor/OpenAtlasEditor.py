@@ -255,6 +255,13 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.localMarkupsWidget.show()
 
     #
+    # Adds the Editor Widget
+    #
+    self.localEditorWidget = Editor.EditorWidget(parent=self.parent, showVolumesFrame=True)
+    self.localEditorWidget.setup()
+    self.localEditorWidget.enter()
+
+    #
     # Models Area
     #
     modelsCollapsibleButton = ctk.ctkCollapsibleButton()
@@ -271,13 +278,6 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.localModelsWidget.setParent(self.parent)
     modelsFormLayout.addRow(self.localModelsWidget)
     self.localModelsWidget.show()
-
-    #
-    # Adds the Editor Widget
-    #
-    self.localEditorWidget = Editor.EditorWidget(parent=self.parent, showVolumesFrame=False)
-    self.localEditorWidget.setup()
-    self.localEditorWidget.enter()
 
     #
     # Apply Button
