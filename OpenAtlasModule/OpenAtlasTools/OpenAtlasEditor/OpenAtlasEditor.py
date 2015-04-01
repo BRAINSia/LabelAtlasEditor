@@ -135,6 +135,22 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     labelParametersFormLayout = qt.QFormLayout(labelParametersCollapsibleButton)
     
     #
+    # input volume selector for Label Params
+    #
+    self.labelParamsInputVolumeSelector = slicer.qMRMLNodeComboBox()
+    self.labelParamsInputVolumeSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.labelParamsInputVolumeSelector.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "0" )
+    self.labelParamsInputVolumeSelector.selectNodeUponCreation = True
+    self.labelParamsInputVolumeSelector.addEnabled = False
+    self.labelParamsInputVolumeSelector.removeEnabled = False
+    self.labelParamsInputVolumeSelector.noneEnabled = False
+    self.labelParamsInputVolumeSelector.showHidden = False
+    self.labelParamsInputVolumeSelector.showChildNodeTypes = False
+    self.labelParamsInputVolumeSelector.setMRMLScene( slicer.mrmlScene )
+    self.labelParamsInputVolumeSelector.setToolTip( "Pick the input to the algorithm." )
+    labelParametersFormLayout.addRow("Input Volume: ", self.labelParamsInputVolumeSelector)
+    
+    #
     # input label map selector for Label Params
     #
     self.labelParamsInputSelectorLabel = slicer.qMRMLNodeComboBox()
@@ -404,6 +420,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     logic = OpenAtlasEditorLogic()
     testFidList = ((119, 183, 105), (118, 183, 105))
     logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
+                           self.labelParamsInputVolumeSelector.currentNode().GetName(),
                            testFidList)
 
   def onApplyButton(self):
@@ -517,7 +534,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     return True
 
-  def runGetRegionInfo(self, inputLabel, seedList, lower=4, upper=4):
+  def runGetRegionInfo(self, inputLabelName, inputVolumeName, seedList, lower=4, upper=4):
     myFilter = sitk.ConnectedThresholdImageFilter()
     myFilter.SetConnectivity(1)
     myFilter.SetDebug(False)
@@ -526,11 +543,19 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     myFilter.SetReplaceValue(1)
     myFilter.SetSeedList(seedList)
     myFilter.SetUpper(upper)
-    inputLabelImage = su.PullFromSlicer(inputLabel)
+    inputLabelImage = su.PullFromSlicer(inputLabelName)
+    inputLabelImage = sitk.Cast(inputLabelImage, sitk.sitkInt16)
+    inputVolumeImage = su.PullFromSlicer(inputVolumeName)
+    inputVolumeImage = sitk.Cast(inputVolumeImage, sitk.sitkInt16)
     output = myFilter.Execute(inputLabelImage)
     dialatedBinaryLabelMap = self.dialateLabelMap(output)
+    dialatedBinaryLabelMap = sitk.Cast(dialatedBinaryLabelMap, sitk.sitkInt16)
+    reducedLabelMapImage = sitk.Multiply(dialatedBinaryLabelMap, inputLabelImage)
+    reducedVolumeImage = sitk.Multiply(dialatedBinaryLabelMap, inputVolumeImage)
     su.PushLabel(output, 'output')
     su.PushLabel(dialatedBinaryLabelMap, 'dialatedBinaryLabelMap')
+    su.PushLabel(reducedLabelMapImage, 'reducedLabelMapImage')
+    su.PushForeground(reducedVolumeImage, 'reducedVolumeImage')
 
     return True
 
