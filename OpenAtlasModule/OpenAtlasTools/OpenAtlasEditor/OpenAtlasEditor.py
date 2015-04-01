@@ -528,9 +528,24 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     myFilter.SetUpper(upper)
     inputLabelImage = su.PullFromSlicer(inputLabel)
     output = myFilter.Execute(inputLabelImage)
+    dialatedBinaryLabelMap = self.dialateLabelMap(output)
     su.PushLabel(output, 'output')
+    su.PushLabel(dialatedBinaryLabelMap, 'dialatedBinaryLabelMap')
 
     return True
+
+  def dialateLabelMap(self, inputLabelImage):
+    myFilter = sitk.BinaryDilateImageFilter()
+    myFilter.SetBackgroundValue(0.0)
+    myFilter.SetBoundaryToForeground(False)
+    myFilter.SetDebug(False)
+    myFilter.SetForegroundValue(1.0)
+    myFilter.SetKernelRadius((1, 1, 1))
+    myFilter.SetKernelType(2)  # Kernel Type=Box
+    myFilter.SetNumberOfThreads(8)
+    output = myFilter.Execute(inputLabelImage)
+
+    return output
 
 class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
   """
