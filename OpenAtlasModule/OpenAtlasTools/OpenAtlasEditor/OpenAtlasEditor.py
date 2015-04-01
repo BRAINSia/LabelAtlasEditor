@@ -177,6 +177,21 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     labelParametersFormLayout.addRow("Output Label Map Volume: ", self.labelParamsOutputSelectorLabel)
 
     #
+    # input label map selector
+    #
+    self.paramsInputSelectorFiducialNode = slicer.qMRMLNodeComboBox()
+    self.paramsInputSelectorFiducialNode.nodeTypes = ( ("vtkMRMLMarkupsFiducialNode"), "" )
+    self.paramsInputSelectorFiducialNode.selectNodeUponCreation = True
+    self.paramsInputSelectorFiducialNode.addEnabled = False
+    self.paramsInputSelectorFiducialNode.removeEnabled = False
+    self.paramsInputSelectorFiducialNode.noneEnabled = False
+    self.paramsInputSelectorFiducialNode.showHidden = False
+    self.paramsInputSelectorFiducialNode.showChildNodeTypes = False
+    self.paramsInputSelectorFiducialNode.setMRMLScene( slicer.mrmlScene )
+    self.paramsInputSelectorFiducialNode.setToolTip( "Pick the input label map to the algorithm." )
+    labelParametersFormLayout.addRow("Input Fiducial Node: ", self.paramsInputSelectorFiducialNode)
+
+    #
     # Merge Suspicious Label to Target Label Parameters Area
     #
     parametersCollapsibleButton = ctk.ctkCollapsibleButton()
