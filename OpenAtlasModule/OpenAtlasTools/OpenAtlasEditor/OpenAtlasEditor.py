@@ -313,48 +313,48 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.outputSelectorLabel.setToolTip( "Pick the output label map to the algorithm." )
     parametersFormLayout.addRow("Output Label Map Volume: ", self.outputSelectorLabel)
 
+    # #
+    # # Markups Area
+    # #
+    # markupsCollapsibleButton = ctk.ctkCollapsibleButton()
+    # markupsCollapsibleButton.text = "Markups"
+    # self.layout.addWidget(markupsCollapsibleButton)
     #
-    # Markups Area
+    # # Layout within the Markups Area collapsible button
+    # markupsFormLayout = qt.QFormLayout(markupsCollapsibleButton)
     #
-    markupsCollapsibleButton = ctk.ctkCollapsibleButton()
-    markupsCollapsibleButton.text = "Markups"
-    self.layout.addWidget(markupsCollapsibleButton)
-
-    # Layout within the Markups Area collapsible button
-    markupsFormLayout = qt.QFormLayout(markupsCollapsibleButton)
-
+    # #
+    # # Adds the Markups widget
+    # #
+    # self.localMarkupsWidget = slicer.modules.markups.widgetRepresentation()
+    # self.localMarkupsWidget.setParent(self.parent)
+    # markupsFormLayout.addRow(self.localMarkupsWidget)
+    # self.localMarkupsWidget.show()
     #
-    # Adds the Markups widget
+    # #
+    # # Adds the Editor Widget
+    # #
+    # self.localEditorWidget = Editor.EditorWidget(parent=self.parent, showVolumesFrame=True)
+    # self.localEditorWidget.setup()
+    # self.localEditorWidget.enter()
     #
-    self.localMarkupsWidget = slicer.modules.markups.widgetRepresentation()
-    self.localMarkupsWidget.setParent(self.parent)
-    markupsFormLayout.addRow(self.localMarkupsWidget)
-    self.localMarkupsWidget.show()
-
+    # #
+    # # Models Area
+    # #
+    # modelsCollapsibleButton = ctk.ctkCollapsibleButton()
+    # modelsCollapsibleButton.text = "Models"
+    # self.layout.addWidget(modelsCollapsibleButton)
     #
-    # Adds the Editor Widget
+    # # Layout within the Models Area collapsible button
+    # modelsFormLayout = qt.QFormLayout(modelsCollapsibleButton)
     #
-    self.localEditorWidget = Editor.EditorWidget(parent=self.parent, showVolumesFrame=True)
-    self.localEditorWidget.setup()
-    self.localEditorWidget.enter()
-
-    #
-    # Models Area
-    #
-    modelsCollapsibleButton = ctk.ctkCollapsibleButton()
-    modelsCollapsibleButton.text = "Models"
-    self.layout.addWidget(modelsCollapsibleButton)
-
-    # Layout within the Models Area collapsible button
-    modelsFormLayout = qt.QFormLayout(modelsCollapsibleButton)
-
-    #
-    # Adds the Models widget
-    #
-    self.localModelsWidget = slicer.modules.models.widgetRepresentation()
-    self.localModelsWidget.setParent(self.parent)
-    modelsFormLayout.addRow(self.localModelsWidget)
-    self.localModelsWidget.show()
+    # #
+    # # Adds the Models widget
+    # #
+    # self.localModelsWidget = slicer.modules.models.widgetRepresentation()
+    # self.localModelsWidget.setParent(self.parent)
+    # modelsFormLayout.addRow(self.localModelsWidget)
+    # self.localModelsWidget.show()
 
     #
     # Apply Button
