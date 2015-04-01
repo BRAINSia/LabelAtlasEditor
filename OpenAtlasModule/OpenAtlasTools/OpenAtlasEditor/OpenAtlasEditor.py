@@ -556,6 +556,9 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     su.PushLabel(dialatedBinaryLabelMap, 'dialatedBinaryLabelMap')
     su.PushLabel(reducedLabelMapImage, 'reducedLabelMapImage')
     su.PushForeground(reducedVolumeImage, 'reducedVolumeImage')
+    labelStats = sitk.LabelStatisticsImageFilter()
+    labelStats.Execute(reducedVolumeImage, reducedLabelMapImage)
+    self.printLabelStatistics(labelStats)
 
     return True
 
@@ -571,6 +574,15 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     output = myFilter.Execute(inputLabelImage)
 
     return output
+
+  def printLabelStatistics(self, labelStatsObject):
+    for val in labelStatsObject.GetLabels():
+      print 'Label:', int(val)
+      print('Count:', labelStatsObject.GetCount(val))
+      print('Mean:', labelStatsObject.GetMean(val))
+      print('Standard Deviation:', labelStatsObject.GetSigma(val))
+      print('Minimum:', labelStatsObject.GetMinimum(val))
+      print('Maximum:', labelStatsObject.GetMaximum(val))
 
 class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
   """
