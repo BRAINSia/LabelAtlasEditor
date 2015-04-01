@@ -124,6 +124,33 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     castParametersFormLayout.addRow(self.castApplyButton)
 
     #
+    # Label Parameters Area
+    #
+    labelParametersCollapsibleButton = ctk.ctkCollapsibleButton()
+    labelParametersCollapsibleButton.text = "Label Parameters"
+    labelParametersCollapsibleButton.setContentsMargins(10, 30, 10, 10)
+    self.layout.addWidget(labelParametersCollapsibleButton)
+
+    # Layout within the Label Parameters Area collapsible button
+    labelParametersFormLayout = qt.QFormLayout(labelParametersCollapsibleButton)
+    
+    #
+    # input label map selector for Label Params
+    #
+    self.labelParamsInputSelectorLabel = slicer.qMRMLNodeComboBox()
+    self.labelParamsInputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.labelParamsInputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
+    self.labelParamsInputSelectorLabel.selectNodeUponCreation = True
+    self.labelParamsInputSelectorLabel.addEnabled = False
+    self.labelParamsInputSelectorLabel.removeEnabled = False
+    self.labelParamsInputSelectorLabel.noneEnabled = False
+    self.labelParamsInputSelectorLabel.showHidden = False
+    self.labelParamsInputSelectorLabel.showChildNodeTypes = False
+    self.labelParamsInputSelectorLabel.setMRMLScene( slicer.mrmlScene )
+    self.labelParamsInputSelectorLabel.setToolTip( "Pick the input label map to the algorithm." )
+    labelParametersFormLayout.addRow("Input Label Map Volume: ", self.labelParamsInputSelectorLabel)
+
+    #
     # Merge Suspicious Label to Target Label Parameters Area
     #
     parametersCollapsibleButton = ctk.ctkCollapsibleButton()
