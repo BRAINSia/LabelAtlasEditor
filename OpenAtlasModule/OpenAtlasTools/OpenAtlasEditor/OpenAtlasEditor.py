@@ -155,9 +155,26 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.label.singleStep = 1.0
     self.label.minimum = 0.0
     self.label.maximum = 10000.0
-    self.label.value = 24.0
+    self.label.value = 0.0
     self.label.setToolTip('Set the label to segment and grow')
-    labelParametersFormLayout.addRow("Target Label: ", self.label)
+    labelParametersFormLayout.addRow("Label: ", self.label)
+    
+    #
+    # output label map selector
+    #
+    self.labelParamsOutputSelectorLabel = slicer.qMRMLNodeComboBox()
+    self.labelParamsOutputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.labelParamsOutputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
+    self.labelParamsOutputSelectorLabel.selectNodeUponCreation = True
+    self.labelParamsOutputSelectorLabel.addEnabled = True
+    self.labelParamsOutputSelectorLabel.renameEnabled = True
+    self.labelParamsOutputSelectorLabel.removeEnabled = True
+    self.labelParamsOutputSelectorLabel.noneEnabled = True
+    self.labelParamsOutputSelectorLabel.showHidden = False
+    self.labelParamsOutputSelectorLabel.showChildNodeTypes = False
+    self.labelParamsOutputSelectorLabel.setMRMLScene( slicer.mrmlScene )
+    self.labelParamsOutputSelectorLabel.setToolTip( "Pick the output label map to the algorithm." )
+    labelParametersFormLayout.addRow("Output Label Map Volume: ", self.labelParamsOutputSelectorLabel)
 
     #
     # Merge Suspicious Label to Target Label Parameters Area
