@@ -196,7 +196,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     #
     self.labelParamsApplyButton = qt.QPushButton("Apply")
     self.labelParamsApplyButton.toolTip = "Run the algorithm."
-    self.labelParamsApplyButton.enabled = False
+    self.labelParamsApplyButton.enabled = True
     self.labelParamsApplyButton.setStyleSheet("background-color: rgb(230,241,255)")
     labelParametersFormLayout.addRow(self.labelParamsApplyButton)
 
@@ -369,6 +369,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.castApplyButton.connect('clicked(bool)', self.onCastApplyButton)
     self.inputCastLabelSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onCastSelect)
     self.outputCastLabelSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onCastSelect)
+    self.labelParamsApplyButton.connect('clicked(bool)', self.onLabelParamsApplyButton)
     self.applyButton.connect('clicked(bool)', self.onApplyButton)
     self.inputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
     self.inputSelectorPosterior.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
@@ -398,6 +399,12 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     logic = OpenAtlasEditorLogic()
     logic.runCast(self.inputCastLabelSelector.currentNode(),
                   self.outputCastLabelSelector.currentNode())
+
+  def onLabelParamsApplyButton(self):
+    logic = OpenAtlasEditorLogic()
+    testFidList = ((119, 183, 105), (118, 183, 105))
+    logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
+                           testFidList)
 
   def onApplyButton(self):
     logic = OpenAtlasEditorLogic()
@@ -507,6 +514,21 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     outputName = outputNode.GetName()
     su.PushLabel(outputImage, outputName, overwrite=True)
     self.setLabelLUT(outputName, inputLabelNodeLUTNodeID)
+
+    return True
+
+  def runGetRegionInfo(self, inputLabel, seedList, lower=4, upper=4):
+    myFilter = sitk.ConnectedThresholdImageFilter()
+    myFilter.SetConnectivity(1)
+    myFilter.SetDebug(False)
+    myFilter.SetLower(lower)
+    myFilter.SetNumberOfThreads(8)
+    myFilter.SetReplaceValue(1)
+    myFilter.SetSeedList(seedList)
+    myFilter.SetUpper(upper)
+    inputLabelImage = su.PullFromSlicer(inputLabel)
+    output = myFilter.Execute(inputLabelImage)
+    su.PushLabel(output, 'output')
 
     return True
 
