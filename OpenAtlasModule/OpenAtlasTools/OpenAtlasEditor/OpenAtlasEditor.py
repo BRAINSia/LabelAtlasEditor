@@ -150,6 +150,15 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.labelParamsInputSelectorLabel.setToolTip( "Pick the input label map to the algorithm." )
     labelParametersFormLayout.addRow("Input Label Map Volume: ", self.labelParamsInputSelectorLabel)
 
+    # label to grow
+    self.label = ctk.ctkSliderWidget()
+    self.label.singleStep = 1.0
+    self.label.minimum = 0.0
+    self.label.maximum = 10000.0
+    self.label.value = 24.0
+    self.label.setToolTip('Set the label to segment and grow')
+    labelParametersFormLayout.addRow("Target Label: ", self.label)
+
     #
     # Merge Suspicious Label to Target Label Parameters Area
     #
