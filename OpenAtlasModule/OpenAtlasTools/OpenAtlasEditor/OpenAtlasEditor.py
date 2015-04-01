@@ -190,6 +190,15 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.paramsInputSelectorFiducialNode.setMRMLScene( slicer.mrmlScene )
     self.paramsInputSelectorFiducialNode.setToolTip( "Pick the input label map to the algorithm." )
     labelParametersFormLayout.addRow("Input Fiducial Node: ", self.paramsInputSelectorFiducialNode)
+    
+    #
+    # Apply Button
+    #
+    self.labelParamsApplyButton = qt.QPushButton("Apply")
+    self.labelParamsApplyButton.toolTip = "Run the algorithm."
+    self.labelParamsApplyButton.enabled = False
+    self.labelParamsApplyButton.setStyleSheet("background-color: rgb(230,241,255)")
+    labelParametersFormLayout.addRow(self.labelParamsApplyButton)
 
     #
     # Merge Suspicious Label to Target Label Parameters Area
