@@ -420,7 +420,8 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     logic = OpenAtlasEditorLogic()
     logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
                            self.labelParamsInputVolumeSelector.currentNode(),
-                           self.paramsInputSelectorFiducialNode.currentNode())
+                           self.paramsInputSelectorFiducialNode.currentNode(),
+                           self.label.value)
 
   def onApplyButton(self):
     logic = OpenAtlasEditorLogic()
@@ -533,14 +534,14 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     return True
 
-  def runGetRegionInfo(self, inputLabelName, inputVolumeNode, inputFiducialNode, lower=4, upper=4):
+  def runGetRegionInfo(self, inputLabelName, inputVolumeNode, inputFiducialNode, label):
     myFilter = sitk.ConnectedThresholdImageFilter()
     myFilter.SetConnectivity(1)
     myFilter.SetDebug(False)
-    myFilter.SetLower(lower)
+    myFilter.SetLower(label)
     myFilter.SetNumberOfThreads(8)
     myFilter.SetReplaceValue(1)
-    myFilter.SetUpper(upper)
+    myFilter.SetUpper(label)
 
     seedList = self.createSeedList(inputFiducialNode, inputVolumeNode)
     myFilter.SetSeedList(seedList)
