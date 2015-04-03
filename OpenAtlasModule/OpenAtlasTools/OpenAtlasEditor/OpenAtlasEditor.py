@@ -418,10 +418,9 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
 
   def onLabelParamsApplyButton(self):
     logic = OpenAtlasEditorLogic()
-    testFidList = ((119, 183, 105), (118, 183, 105))
     logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
-                           self.labelParamsInputVolumeSelector.currentNode().GetName(),
-                           testFidList)
+                           self.labelParamsInputVolumeSelector.currentNode(),
+                           self.paramsInputSelectorFiducialNode.currentNode())
 
   def onApplyButton(self):
     logic = OpenAtlasEditorLogic()
@@ -534,28 +533,34 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     return True
 
-  def runGetRegionInfo(self, inputLabelName, inputVolumeName, seedList, lower=4, upper=4):
+  def runGetRegionInfo(self, inputLabelName, inputVolumeNode, inputFiducialNode, lower=4, upper=4):
     myFilter = sitk.ConnectedThresholdImageFilter()
     myFilter.SetConnectivity(1)
     myFilter.SetDebug(False)
     myFilter.SetLower(lower)
     myFilter.SetNumberOfThreads(8)
     myFilter.SetReplaceValue(1)
-    myFilter.SetSeedList(seedList)
     myFilter.SetUpper(upper)
+
+    seedList = self.createSeedList(inputFiducialNode, inputVolumeNode)
+    myFilter.SetSeedList(seedList)
+
     inputLabelImage = su.PullFromSlicer(inputLabelName)
     inputLabelImage = sitk.Cast(inputLabelImage, sitk.sitkInt16)
-    inputVolumeImage = su.PullFromSlicer(inputVolumeName)
+    inputVolumeImage = su.PullFromSlicer(inputVolumeNode.GetName())
     inputVolumeImage = sitk.Cast(inputVolumeImage, sitk.sitkInt16)
+
     output = myFilter.Execute(inputLabelImage)
     dialatedBinaryLabelMap = self.dialateLabelMap(output)
     dialatedBinaryLabelMap = sitk.Cast(dialatedBinaryLabelMap, sitk.sitkInt16)
     reducedLabelMapImage = sitk.Multiply(dialatedBinaryLabelMap, inputLabelImage)
     reducedVolumeImage = sitk.Multiply(dialatedBinaryLabelMap, inputVolumeImage)
+
     su.PushLabel(output, 'output')
     su.PushLabel(dialatedBinaryLabelMap, 'dialatedBinaryLabelMap')
     su.PushLabel(reducedLabelMapImage, 'reducedLabelMapImage')
     su.PushForeground(reducedVolumeImage, 'reducedVolumeImage')
+
     labelStats = sitk.LabelStatisticsImageFilter()
     labelStats.Execute(reducedVolumeImage, reducedLabelMapImage)
     self.printLabelStatistics(labelStats)
@@ -583,6 +588,28 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       print('Standard Deviation:', labelStatsObject.GetSigma(val))
       print('Minimum:', labelStatsObject.GetMinimum(val))
       print('Maximum:', labelStatsObject.GetMaximum(val))
+
+  def createSeedList(self, inputFiducialNode, inputVolumeNode):
+    seedList = list()
+    ras2ijk = self.getRas2ijkMatrix(inputVolumeNode)
+    for val in range(0, inputFiducialNode.GetNumberOfFiducials()):
+      rasPoint = [0, 0, 0, 0]
+      inputFiducialNode.GetNthFiducialWorldCoordinates(val, rasPoint)
+      ijkPoint = self.getIJKFromRAS(rasPoint, ras2ijk)
+      seedList.append(ijkPoint)
+
+    return seedList
+
+  def getRas2ijkMatrix(self, volumeNode):
+    ras2ijk = vtk.vtkMatrix4x4()
+    volumeNode.GetRASToIJKMatrix(ras2ijk)
+
+    return ras2ijk
+
+  def getIJKFromRAS(self, rasPoint, ras2ijk):
+    ijkPoint = [int(round(c)) for c in ras2ijk.MultiplyPoint(rasPoint)[:3]]
+
+    return ijkPoint
 
 class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
   """
