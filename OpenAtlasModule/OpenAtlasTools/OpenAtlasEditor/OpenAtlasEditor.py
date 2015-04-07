@@ -137,18 +137,34 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     #
     # input volume selector for Label Params
     #
-    self.labelParamsInputVolumeSelector = slicer.qMRMLNodeComboBox()
-    self.labelParamsInputVolumeSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
-    self.labelParamsInputVolumeSelector.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "0" )
-    self.labelParamsInputVolumeSelector.selectNodeUponCreation = True
-    self.labelParamsInputVolumeSelector.addEnabled = False
-    self.labelParamsInputVolumeSelector.removeEnabled = False
-    self.labelParamsInputVolumeSelector.noneEnabled = False
-    self.labelParamsInputVolumeSelector.showHidden = False
-    self.labelParamsInputVolumeSelector.showChildNodeTypes = False
-    self.labelParamsInputVolumeSelector.setMRMLScene( slicer.mrmlScene )
-    self.labelParamsInputVolumeSelector.setToolTip( "Pick the input to the algorithm." )
-    labelParametersFormLayout.addRow("Input Volume: ", self.labelParamsInputVolumeSelector)
+    self.labelParamsInputT1VolumeSelector = slicer.qMRMLNodeComboBox()
+    self.labelParamsInputT1VolumeSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.labelParamsInputT1VolumeSelector.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "0" )
+    self.labelParamsInputT1VolumeSelector.selectNodeUponCreation = True
+    self.labelParamsInputT1VolumeSelector.addEnabled = False
+    self.labelParamsInputT1VolumeSelector.removeEnabled = False
+    self.labelParamsInputT1VolumeSelector.noneEnabled = False
+    self.labelParamsInputT1VolumeSelector.showHidden = False
+    self.labelParamsInputT1VolumeSelector.showChildNodeTypes = False
+    self.labelParamsInputT1VolumeSelector.setMRMLScene( slicer.mrmlScene )
+    self.labelParamsInputT1VolumeSelector.setToolTip( "Pick the input to the algorithm." )
+    labelParametersFormLayout.addRow("Input T1 Volume: ", self.labelParamsInputT1VolumeSelector)
+    
+    #
+    # input volume selector for Label Params
+    #
+    self.labelParamsInputT2VolumeSelector = slicer.qMRMLNodeComboBox()
+    self.labelParamsInputT2VolumeSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.labelParamsInputT2VolumeSelector.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "0" )
+    self.labelParamsInputT2VolumeSelector.selectNodeUponCreation = True
+    self.labelParamsInputT2VolumeSelector.addEnabled = False
+    self.labelParamsInputT2VolumeSelector.removeEnabled = False
+    self.labelParamsInputT2VolumeSelector.noneEnabled = False
+    self.labelParamsInputT2VolumeSelector.showHidden = False
+    self.labelParamsInputT2VolumeSelector.showChildNodeTypes = False
+    self.labelParamsInputT2VolumeSelector.setMRMLScene( slicer.mrmlScene )
+    self.labelParamsInputT2VolumeSelector.setToolTip( "Pick the input to the algorithm." )
+    labelParametersFormLayout.addRow("Input T2 Volume: ", self.labelParamsInputT2VolumeSelector)
     
     #
     # input label map selector for Label Params
@@ -419,7 +435,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
   def onLabelParamsApplyButton(self):
     logic = OpenAtlasEditorLogic()
     logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
-                           self.labelParamsInputVolumeSelector.currentNode(),
+                           self.labelParamsInputT1VolumeSelector.currentNode(),
                            self.paramsInputSelectorFiducialNode.currentNode(),
                            self.label.value)
 
