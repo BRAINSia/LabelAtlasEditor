@@ -570,11 +570,19 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     su.PushLabel(reducedLabelMapImage, 'reducedLabelMapImage')
     su.PushForeground(reducedVolumeImage, 'reducedVolumeImage')
 
-    labelStats = sitk.LabelStatisticsImageFilter()
-    labelStats.Execute(reducedVolumeImage, reducedLabelMapImage)
-    self.printLabelStatistics(labelStats)
+    reducedLabelMapLabelStats = self.getLabelStatsObject(reducedVolumeImage, reducedLabelMapImage)
+    T1LabelStats = self.getLabelStatsObject(inputT1VolumeImage, inputLabelImage)
+    T2LabelStats = self.getLabelStatsObject(inputT2VolumeImage, inputLabelImage)
+
+    self.printLabelStatistics(reducedLabelMapLabelStats)
 
     return True
+
+  def getLabelStatsObject(self, volumeImage, labelImage):
+    labelStatsObject = sitk.LabelStatisticsImageFilter()
+    labelStatsObject.Execute(volumeImage, labelImage)
+
+    return labelStatsObject
 
   def getSitkInt16ImageFromSlicer(self, volumeName):
     volume = su.PullFromSlicer(volumeName)
