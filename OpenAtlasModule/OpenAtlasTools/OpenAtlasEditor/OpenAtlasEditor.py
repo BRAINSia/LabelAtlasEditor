@@ -555,14 +555,10 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
   def runGetRegionInfo(self, inputLabelName, inputT1VolumeNode, inputT2VolumeNode, inputFiducialNode, label):
 
     seedList = self.createSeedList(inputFiducialNode, inputT1VolumeNode)
-
-    inputLabelImage = su.PullFromSlicer(inputLabelName)
-    inputLabelImage = sitk.Cast(inputLabelImage, sitk.sitkInt16)
-
+    inputLabelImage = self.getSitkInt16ImageFromSlicer(inputLabelName)
     connectedThresholdOutput = self.runConnectedThresholdImageFilter(label, seedList, inputLabelImage)
 
-    inputVolumeImage = su.PullFromSlicer(inputT1VolumeNode.GetName())
-    inputVolumeImage = sitk.Cast(inputVolumeImage, sitk.sitkInt16)
+    inputVolumeImage = self.getSitkInt16ImageFromSlicer(inputT1VolumeNode.GetName())
 
     dialatedBinaryLabelMap = self.dialateLabelMap(connectedThresholdOutput)
     dialatedBinaryLabelMap = sitk.Cast(dialatedBinaryLabelMap, sitk.sitkInt16)
@@ -579,6 +575,12 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     self.printLabelStatistics(labelStats)
 
     return True
+
+  def getSitkInt16ImageFromSlicer(self, volumeName):
+    volume = su.PullFromSlicer(volumeName)
+    castedVolume = sitk.Cast(volume, sitk.sitkInt16)
+
+    return castedVolume
 
   def runConnectedThresholdImageFilter(self, label, seedList, inputLabelImage):
     myFilter = sitk.ConnectedThresholdImageFilter()
