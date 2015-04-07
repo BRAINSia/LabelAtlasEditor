@@ -214,8 +214,9 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.paramsInputSelectorFiducialNode = slicer.qMRMLNodeComboBox()
     self.paramsInputSelectorFiducialNode.nodeTypes = ( ("vtkMRMLMarkupsFiducialNode"), "" )
     self.paramsInputSelectorFiducialNode.selectNodeUponCreation = True
-    self.paramsInputSelectorFiducialNode.addEnabled = False
-    self.paramsInputSelectorFiducialNode.removeEnabled = False
+    self.paramsInputSelectorFiducialNode.addEnabled = True
+    self.paramsInputSelectorFiducialNode.renameEnabled = True
+    self.paramsInputSelectorFiducialNode.removeEnabled = True
     self.paramsInputSelectorFiducialNode.noneEnabled = False
     self.paramsInputSelectorFiducialNode.showHidden = False
     self.paramsInputSelectorFiducialNode.showChildNodeTypes = False
