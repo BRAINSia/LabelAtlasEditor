@@ -553,29 +553,23 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     return True
 
   def runGetRegionInfo(self, inputLabelName, inputT1VolumeNode, inputT2VolumeNode, inputFiducialNode, label):
-    myFilter = sitk.ConnectedThresholdImageFilter()
-    myFilter.SetConnectivity(1)
-    myFilter.SetDebug(False)
-    myFilter.SetLower(label)
-    myFilter.SetNumberOfThreads(8)
-    myFilter.SetReplaceValue(1)
-    myFilter.SetUpper(label)
 
     seedList = self.createSeedList(inputFiducialNode, inputT1VolumeNode)
-    myFilter.SetSeedList(seedList)
 
     inputLabelImage = su.PullFromSlicer(inputLabelName)
     inputLabelImage = sitk.Cast(inputLabelImage, sitk.sitkInt16)
+
+    connectedThresholdOutput = self.runConnectedThresholdImageFilter(label, seedList, inputLabelImage)
+
     inputVolumeImage = su.PullFromSlicer(inputT1VolumeNode.GetName())
     inputVolumeImage = sitk.Cast(inputVolumeImage, sitk.sitkInt16)
 
-    output = myFilter.Execute(inputLabelImage)
-    dialatedBinaryLabelMap = self.dialateLabelMap(output)
+    dialatedBinaryLabelMap = self.dialateLabelMap(connectedThresholdOutput)
     dialatedBinaryLabelMap = sitk.Cast(dialatedBinaryLabelMap, sitk.sitkInt16)
     reducedLabelMapImage = sitk.Multiply(dialatedBinaryLabelMap, inputLabelImage)
     reducedVolumeImage = sitk.Multiply(dialatedBinaryLabelMap, inputVolumeImage)
 
-    su.PushLabel(output, 'output')
+    su.PushLabel(connectedThresholdOutput, 'connectedThresholdOutput')
     su.PushLabel(dialatedBinaryLabelMap, 'dialatedBinaryLabelMap')
     su.PushLabel(reducedLabelMapImage, 'reducedLabelMapImage')
     su.PushForeground(reducedVolumeImage, 'reducedVolumeImage')
@@ -585,6 +579,19 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     self.printLabelStatistics(labelStats)
 
     return True
+
+  def runConnectedThresholdImageFilter(self, label, seedList, inputLabelImage):
+    myFilter = sitk.ConnectedThresholdImageFilter()
+    myFilter.SetConnectivity(1)
+    myFilter.SetDebug(False)
+    myFilter.SetLower(label)
+    myFilter.SetNumberOfThreads(8)
+    myFilter.SetReplaceValue(1)
+    myFilter.SetUpper(label)
+    myFilter.SetSeedList(seedList)
+    output = myFilter.Execute(inputLabelImage)
+
+    return output
 
   def dialateLabelMap(self, inputLabelImage):
     myFilter = sitk.BinaryDilateImageFilter()
