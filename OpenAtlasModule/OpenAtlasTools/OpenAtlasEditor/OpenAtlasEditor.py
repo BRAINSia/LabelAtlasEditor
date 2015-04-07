@@ -211,18 +211,18 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     #
     # input label map selector
     #
-    self.paramsInputSelectorFiducialNode = slicer.qMRMLNodeComboBox()
-    self.paramsInputSelectorFiducialNode.nodeTypes = ( ("vtkMRMLMarkupsFiducialNode"), "" )
-    self.paramsInputSelectorFiducialNode.selectNodeUponCreation = True
-    self.paramsInputSelectorFiducialNode.addEnabled = True
-    self.paramsInputSelectorFiducialNode.renameEnabled = True
-    self.paramsInputSelectorFiducialNode.removeEnabled = True
-    self.paramsInputSelectorFiducialNode.noneEnabled = False
-    self.paramsInputSelectorFiducialNode.showHidden = False
-    self.paramsInputSelectorFiducialNode.showChildNodeTypes = False
-    self.paramsInputSelectorFiducialNode.setMRMLScene( slicer.mrmlScene )
-    self.paramsInputSelectorFiducialNode.setToolTip( "Pick the input label map to the algorithm." )
-    labelParametersFormLayout.addRow("Input Fiducial Node: ", self.paramsInputSelectorFiducialNode)
+    self.labelParamsInputFiducialSelector = slicer.qMRMLNodeComboBox()
+    self.labelParamsInputFiducialSelector.nodeTypes = ( ("vtkMRMLMarkupsFiducialNode"), "" )
+    self.labelParamsInputFiducialSelector.selectNodeUponCreation = True
+    self.labelParamsInputFiducialSelector.addEnabled = True
+    self.labelParamsInputFiducialSelector.renameEnabled = True
+    self.labelParamsInputFiducialSelector.removeEnabled = True
+    self.labelParamsInputFiducialSelector.noneEnabled = False
+    self.labelParamsInputFiducialSelector.showHidden = False
+    self.labelParamsInputFiducialSelector.showChildNodeTypes = False
+    self.labelParamsInputFiducialSelector.setMRMLScene( slicer.mrmlScene )
+    self.labelParamsInputFiducialSelector.setToolTip( "Pick the input label map to the algorithm." )
+    labelParametersFormLayout.addRow("Input Fiducial Node: ", self.labelParamsInputFiducialSelector)
     
     #
     # Apply Button
@@ -438,7 +438,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
                            self.labelParamsInputT1VolumeSelector.currentNode(),
                            self.labelParamsInputT2VolumeSelector.currentNode(),
-                           self.paramsInputSelectorFiducialNode.currentNode(),
+                           self.labelParamsInputFiducialSelector.currentNode(),
                            self.label.value)
 
   def onApplyButton(self):
