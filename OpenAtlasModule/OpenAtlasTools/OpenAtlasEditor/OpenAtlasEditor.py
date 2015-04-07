@@ -437,6 +437,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     logic = OpenAtlasEditorLogic()
     logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
                            self.labelParamsInputT1VolumeSelector.currentNode(),
+                           self.labelParamsInputT2VolumeSelector.currentNode(),
                            self.paramsInputSelectorFiducialNode.currentNode(),
                            self.label.value)
 
@@ -551,7 +552,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     return True
 
-  def runGetRegionInfo(self, inputLabelName, inputVolumeNode, inputFiducialNode, label):
+  def runGetRegionInfo(self, inputLabelName, inputT1VolumeNode, inputT2VolumeNode, inputFiducialNode, label):
     myFilter = sitk.ConnectedThresholdImageFilter()
     myFilter.SetConnectivity(1)
     myFilter.SetDebug(False)
@@ -560,12 +561,12 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     myFilter.SetReplaceValue(1)
     myFilter.SetUpper(label)
 
-    seedList = self.createSeedList(inputFiducialNode, inputVolumeNode)
+    seedList = self.createSeedList(inputFiducialNode, inputT1VolumeNode)
     myFilter.SetSeedList(seedList)
 
     inputLabelImage = su.PullFromSlicer(inputLabelName)
     inputLabelImage = sitk.Cast(inputLabelImage, sitk.sitkInt16)
-    inputVolumeImage = su.PullFromSlicer(inputVolumeNode.GetName())
+    inputVolumeImage = su.PullFromSlicer(inputT1VolumeNode.GetName())
     inputVolumeImage = sitk.Cast(inputVolumeImage, sitk.sitkInt16)
 
     output = myFilter.Execute(inputLabelImage)
