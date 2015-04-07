@@ -562,7 +562,6 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     inputT2VolumeImage = self.getSitkInt16ImageFromSlicer(inputT2VolumeNode.GetName())
 
     dialatedBinaryLabelMap = self.dialateLabelMap(connectedThresholdOutput)
-    dialatedBinaryLabelMap = sitk.Cast(dialatedBinaryLabelMap, sitk.sitkInt16)
     reducedLabelMapImage = sitk.Multiply(dialatedBinaryLabelMap, inputLabelImage)
     reducedVolumeImage = sitk.Multiply(dialatedBinaryLabelMap, inputT1VolumeImage)
 
@@ -606,8 +605,9 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     myFilter.SetKernelType(2)  # Kernel Type=Box
     myFilter.SetNumberOfThreads(8)
     output = myFilter.Execute(inputLabelImage)
+    castedOutput = sitk.Cast(output, sitk.sitkInt16)
 
-    return output
+    return castedOutput
 
   def printLabelStatistics(self, labelStatsObject):
     for val in labelStatsObject.GetLabels():
