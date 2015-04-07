@@ -563,14 +563,13 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     dialatedBinaryLabelMap = self.dialateLabelMap(connectedThresholdOutput)
     reducedLabelMapImage = sitk.Multiply(dialatedBinaryLabelMap, inputLabelImage)
-    reducedVolumeImage = sitk.Multiply(dialatedBinaryLabelMap, inputT1VolumeImage)
 
     su.PushLabel(connectedThresholdOutput, 'connectedThresholdOutput')
     su.PushLabel(dialatedBinaryLabelMap, 'dialatedBinaryLabelMap')
     su.PushLabel(reducedLabelMapImage, 'reducedLabelMapImage')
     su.PushForeground(reducedVolumeImage, 'reducedVolumeImage')
 
-    reducedLabelMapLabelStats = self.getLabelStatsObject(reducedVolumeImage, reducedLabelMapImage)
+    reducedLabelMapLabelStats = self.getLabelStatsObject(inputT1VolumeImage, reducedLabelMapImage)
     T1LabelStats = self.getLabelStatsObject(inputT1VolumeImage, inputLabelImage)
     T2LabelStats = self.getLabelStatsObject(inputT2VolumeImage, inputLabelImage)
 
