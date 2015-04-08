@@ -183,15 +183,6 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.labelParamsInputSelectorLabel.setToolTip( "Pick the input label map to the algorithm." )
     labelParametersFormLayout.addRow("Input Label Map Volume: ", self.labelParamsInputSelectorLabel)
 
-    # label to grow
-    self.label = ctk.ctkSliderWidget()
-    self.label.singleStep = 1.0
-    self.label.minimum = 0.0
-    self.label.maximum = 10000.0
-    self.label.value = 0.0
-    self.label.setToolTip('Set the label to segment and grow')
-    labelParametersFormLayout.addRow("Label: ", self.label)
-    
     #
     # output label map selector
     #
@@ -439,8 +430,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
                            self.labelParamsInputT1VolumeSelector.currentNode(),
                            self.labelParamsInputT2VolumeSelector.currentNode(),
-                           self.labelParamsInputFiducialSelector.currentNode(),
-                           self.label.value)
+                           self.labelParamsInputFiducialSelector.currentNode())
 
   def onApplyButton(self):
     logic = OpenAtlasEditorLogic()
@@ -554,11 +544,12 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     return True
 
   def runGetRegionInfo(self, inputLabelName, inputT1VolumeNode,
-                       inputT2VolumeNode, inputFiducialNode, label):
+                       inputT2VolumeNode, inputFiducialNode):
 
     seedList = self.createSeedList(inputFiducialNode, inputT1VolumeNode)
     inputLabelImage = self.getSitkInt16ImageFromSlicer(inputLabelName)
-    connectedThresholdOutput = self.runConnectedThresholdImageFilter(label, seedList, inputLabelImage)
+    suspiciousLabel = self.getLabel(inputLabelImage, seedList)
+    connectedThresholdOutput = self.runConnectedThresholdImageFilter(suspiciousLabel, seedList, inputLabelImage)
 
     inputT1VolumeImage = self.getSitkInt16ImageFromSlicer(inputT1VolumeNode.GetName())
     inputT2VolumeImage = self.getSitkInt16ImageFromSlicer(inputT2VolumeNode.GetName())
@@ -581,13 +572,17 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     self.printLabelStatistics(reducedLabelMapT1LabelStats)
     squareRootDiffLabelDict = self.calculateLabelIntensityDifferenceValue(
-                              reducedLabelMapT1LabelStats.GetMean(int(label)),
-                              reducedLabelMapT2LabelStats.GetMean(int(label)),
+                              reducedLabelMapT1LabelStats.GetMean(int(suspiciousLabel)),
+                              reducedLabelMapT2LabelStats.GetMean(int(suspiciousLabel)),
                               targetLabels, T1LabelStats, T2LabelStats)
 
     print squareRootDiffLabelDict
 
     return True
+
+  def getLabel(self, inputLabelImage, seedList):
+
+    return int(inputLabelImage.GetPixel(seedList[0][0], seedList[0][1], seedList[0][2]))
 
   def getLabelStatsObject(self, volumeImage, labelImage):
     labelStatsObject = sitk.LabelStatisticsImageFilter()
