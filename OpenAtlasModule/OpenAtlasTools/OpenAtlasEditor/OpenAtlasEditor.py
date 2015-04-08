@@ -222,9 +222,9 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     labelParametersFormLayout.addRow("Input Fiducial Node: ", self.labelParamsInputFiducialSelector)
     
     #
-    # Apply Button
+    # Calculate Square Diffs of Means Button
     #
-    self.labelParamsApplyButton = qt.QPushButton("Apply")
+    self.labelParamsApplyButton = qt.QPushButton("Calculate Square Diffs of Means")
     self.labelParamsApplyButton.toolTip = "Run the algorithm."
     self.labelParamsApplyButton.enabled = True
     self.labelParamsApplyButton.setStyleSheet("background-color: rgb(230,241,255)")
@@ -234,6 +234,15 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.view = qt.QTableView()
     self.view.sortingEnabled = True
     labelParametersFormLayout.addWidget(self.view)
+
+    #
+    # Apply Button
+    #
+    self.labelParamsRelabelButton = qt.QPushButton("Relabel output label map to checked label")
+    self.labelParamsRelabelButton.toolTip = "Run the algorithm."
+    self.labelParamsRelabelButton.enabled = True
+    self.labelParamsRelabelButton.setStyleSheet("background-color: rgb(230,241,255)")
+    labelParametersFormLayout.addRow(self.labelParamsRelabelButton)
 
     #
     # Merge Suspicious Label to Target Label Parameters Area
@@ -468,7 +477,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
 
 
   def populateStats(self):
-    self.tableColumnNames = ['Label', 'Label Name', 'Square Diff of Means']
+    self.tableColumnNames = ['Label Number', 'Label Name', 'Square Diff of Means']
 
     if not self.logic:
       return
@@ -491,10 +500,11 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
       self.model.setItem(row, 0, item)
       self.items.append(item)
 
-      # write Label NUmber column
+      # write Label Number column
       item = qt.QStandardItem()
       item.setData(float(i), qt.Qt.DisplayRole)
       item.setToolTip(colorNode.GetColorName(i))
+      item.setCheckable(True)
       self.model.setItem(row, 1, item)
       self.items.append(item)
 
