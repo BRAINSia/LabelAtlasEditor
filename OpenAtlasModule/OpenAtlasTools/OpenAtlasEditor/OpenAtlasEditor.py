@@ -570,10 +570,16 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     su.PushLabel(reducedLabelMapImage, 'reducedLabelMapImage')
 
     reducedLabelMapLabelStats = self.getLabelStatsObject(inputT1VolumeImage, reducedLabelMapImage)
+    listOfBorderLabels = self.createListOfBorderLabels(reducedLabelMapLabelStats, label)
+
     T1LabelStats = self.getLabelStatsObject(inputT1VolumeImage, inputLabelImage)
     T2LabelStats = self.getLabelStatsObject(inputT2VolumeImage, inputLabelImage)
 
     self.printLabelStatistics(reducedLabelMapLabelStats)
+    squareRootDiffLabelDict = self.calculateLabelIntensityDifferenceValue(
+                              listOfBorderLabels, label, T1LabelStats, T2LabelStats)
+
+    print squareRootDiffLabelDict
 
     return True
 
@@ -616,6 +622,13 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     return castedOutput
 
+  def createListOfBorderLabels(self, labelStats, label):
+    labels = labelStats.GetLabels()
+    labels.pop(0)
+    labels.pop(label)
+
+    return labels
+
   def calculateLabelIntensityDifferenceValue(self, listOfLabels, suspiciousLabel,
                                              T1LabelStats, T2LabelStats):
     """
@@ -636,8 +649,10 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       averageT2IntensitySuspiciousLabel = T2LabelStats.GetMean(suspiciousLabel)
       averageT2IntensityTargetLabel = T2LabelStats.GetMean(targetLabel)
 
-      squareDiffAverageT1 = math.pow(averageT1IntensitySuspiciousLabel - averageT1IntensityTargetLabel, 2)
-      squareDiffAverageT2 = math.pow(averageT2IntensitySuspiciousLabel - averageT2IntensityTargetLabel, 2)
+      squareDiffAverageT1 = math.pow(averageT1IntensitySuspiciousLabel -
+                                     averageT1IntensityTargetLabel, 2)
+      squareDiffAverageT2 = math.pow(averageT2IntensitySuspiciousLabel -
+                                     averageT2IntensityTargetLabel, 2)
       squareRootDiff = math.sqrt(squareDiffAverageT1 + squareDiffAverageT2)
 
       squareRootDiffLabelDict[targetLabel] = squareRootDiff
