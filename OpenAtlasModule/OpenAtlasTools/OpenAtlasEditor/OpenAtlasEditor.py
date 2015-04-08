@@ -740,6 +740,13 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
         su.PushLabel(relabeledImage, outputLabelNodeName, overwrite=True)
         self.setLabelLUT(outputLabelNodeName, inputLabelNodeLUTNodeID)
 
+  def relabelImage(self, labelImage, newRegion, newLabel): 
+    negatedMask = sitk.BinaryNot(newRegion) 
+    negatedImage = sitk.Mask(labelImage, negatedMask) 
+    maskTimesNewLabel = sitk.Multiply(newRegion, newLabel) 
+    relabeledImage = sitk.Add(negatedImage, maskTimesNewLabel) 
+    return relabeledImage
+
   def printLabelStatistics(self, labelStatsObject):
     for val in labelStatsObject.GetLabels():
       print 'Label:', int(val)
