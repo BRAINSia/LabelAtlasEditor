@@ -565,19 +565,20 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     dialatedBinaryLabelMap = self.dialateLabelMap(connectedThresholdOutput)
     reducedLabelMapImage = sitk.Multiply(dialatedBinaryLabelMap, inputLabelImage)
 
-    su.PushLabel(connectedThresholdOutput, 'connectedThresholdOutput')
-    su.PushLabel(dialatedBinaryLabelMap, 'dialatedBinaryLabelMap')
-    su.PushLabel(reducedLabelMapImage, 'reducedLabelMapImage')
+    su.PushLabel(connectedThresholdOutput, 'connectedThresholdOutput', overwrite=True)
+    su.PushLabel(dialatedBinaryLabelMap, 'dialatedBinaryLabelMap', overwrite=True)
+    su.PushLabel(reducedLabelMapImage, 'reducedLabelMapImage', overwrite=True)
 
     reducedLabelMapLabelStats = self.getLabelStatsObject(inputT1VolumeImage, reducedLabelMapImage)
-    listOfBorderLabels = self.createListOfBorderLabels(reducedLabelMapLabelStats, label)
+    targetLabels = reducedLabelMapLabelStats.GetLabels()
 
     T1LabelStats = self.getLabelStatsObject(inputT1VolumeImage, inputLabelImage)
     T2LabelStats = self.getLabelStatsObject(inputT2VolumeImage, inputLabelImage)
 
     self.printLabelStatistics(reducedLabelMapLabelStats)
     squareRootDiffLabelDict = self.calculateLabelIntensityDifferenceValue(
-                              listOfBorderLabels, label, T1LabelStats, T2LabelStats)
+                              targetLabels, int(label),
+                              T1LabelStats, T2LabelStats)
 
     print squareRootDiffLabelDict
 
@@ -622,14 +623,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     return castedOutput
 
-  def createListOfBorderLabels(self, labelStats, label):
-    labels = labelStats.GetLabels()
-    labels.pop(0)
-    labels.pop(label)
-
-    return labels
-
-  def calculateLabelIntensityDifferenceValue(self, listOfLabels, suspiciousLabel,
+  def calculateLabelIntensityDifferenceValue(self, targetLabels, suspiciousLabel,
                                              T1LabelStats, T2LabelStats):
     """
     Calculates a measurement for each label that is on the border of the suspicious label.
@@ -642,7 +636,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     squareRootDiffLabelDict = dict()
 
-    for targetLabel in listOfLabels:
+    for targetLabel in targetLabels:
       averageT1IntensitySuspiciousLabel = T1LabelStats.GetMean(suspiciousLabel)
       averageT1IntensityTargetLabel = T1LabelStats.GetMean(targetLabel)
 
@@ -655,7 +649,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
                                      averageT2IntensityTargetLabel, 2)
       squareRootDiff = math.sqrt(squareDiffAverageT1 + squareDiffAverageT2)
 
-      squareRootDiffLabelDict[targetLabel] = squareRootDiff
+      squareRootDiffLabelDict[int(targetLabel)] = squareRootDiff
 
     return squareRootDiffLabelDict
 
