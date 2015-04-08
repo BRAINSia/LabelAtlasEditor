@@ -574,8 +574,10 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     reducedLabelMapT2LabelStats = self.getLabelStatsObject(inputT1VolumeImage, reducedLabelMapImage)
     targetLabels = reducedLabelMapT1LabelStats.GetLabels()
 
-    T1LabelStats = self.getLabelStatsObject(inputT1VolumeImage, inputLabelImage)
-    T2LabelStats = self.getLabelStatsObject(inputT2VolumeImage, inputLabelImage)
+    labelImageWithoutSuspiciousIslandPixels = self.relabel(inputLabelImage, connectedThresholdOutput, 0)
+
+    T1LabelStats = self.getLabelStatsObject(inputT1VolumeImage, labelImageWithoutSuspiciousIslandPixels)
+    T2LabelStats = self.getLabelStatsObject(inputT2VolumeImage, labelImageWithoutSuspiciousIslandPixels)
 
     self.printLabelStatistics(reducedLabelMapT1LabelStats)
     squareRootDiffLabelDict = self.calculateLabelIntensityDifferenceValue(
@@ -641,6 +643,8 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     squareRootDiffLabelDict = dict()
 
     for targetLabel in targetLabels:
+      # if targetLabel == 0:
+      #   continue
       averageT1IntensityTargetLabel = T1LabelStats.GetMean(targetLabel)
       averageT2IntensityTargetLabel = T2LabelStats.GetMean(targetLabel)
 
