@@ -39,8 +39,13 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
   https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
   """
 
+  def __init__(self, parent):
+    ScriptedLoadableModuleWidget.__init__(self, parent)
+    self.logic = OpenAtlasEditorLogic()
+
   def setup(self):
     ScriptedLoadableModuleWidget.setup(self)
+
     # Instantiate and connect widgets ...
 
     #
@@ -224,6 +229,11 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.labelParamsApplyButton.enabled = True
     self.labelParamsApplyButton.setStyleSheet("background-color: rgb(230,241,255)")
     labelParametersFormLayout.addRow(self.labelParamsApplyButton)
+
+    # model and view for stats table
+    self.view = qt.QTableView()
+    self.view.sortingEnabled = True
+    labelParametersFormLayout.addWidget(self.view)
 
     #
     # Merge Suspicious Label to Target Label Parameters Area
@@ -421,28 +431,25 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
                                  and self.outputSelectorLabel.currentNode()
 
   def onCastApplyButton(self):
-    logic = OpenAtlasEditorLogic()
-    logic.runCast(self.inputCastLabelSelector.currentNode(),
+    self.logic.runCast(self.inputCastLabelSelector.currentNode(),
                   self.outputCastLabelSelector.currentNode())
 
   def onLabelParamsApplyButton(self):
-    logic = OpenAtlasEditorLogic()
-    logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
+    self.logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
                            self.labelParamsInputT1VolumeSelector.currentNode(),
                            self.labelParamsInputT2VolumeSelector.currentNode(),
                            self.labelParamsInputFiducialSelector.currentNode())
 
   def onApplyButton(self):
-    logic = OpenAtlasEditorLogic()
 
     print("Merge Apply button selected")
 
     if not self.enablePosteriorCheckBox.checked:
-      logic.run(self.inputSelectorLabel.currentNode().GetName(),
+      self.logic.run(self.inputSelectorLabel.currentNode().GetName(),
               self.outputSelectorLabel.currentNode().GetName(),
               self.targetLabel.value, self.suspiciousLabel.value)
     else:
-      logic.run(self.inputSelectorLabel.currentNode().GetName(),
+      self.logic.run(self.inputSelectorLabel.currentNode().GetName(),
               self.outputSelectorLabel.currentNode().GetName(),
               self.targetLabel.value, self.suspiciousLabel.value,
               enablePosterior=True,
