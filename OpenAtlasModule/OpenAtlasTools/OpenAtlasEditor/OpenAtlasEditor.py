@@ -643,8 +643,8 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     squareRootDiffLabelDict = dict()
 
     for targetLabel in targetLabels:
-      # if targetLabel == 0:
-      #   continue
+      if targetLabel == 0:
+        continue
       averageT1IntensityTargetLabel = T1LabelStats.GetMean(targetLabel)
       averageT2IntensityTargetLabel = T2LabelStats.GetMean(targetLabel)
 
