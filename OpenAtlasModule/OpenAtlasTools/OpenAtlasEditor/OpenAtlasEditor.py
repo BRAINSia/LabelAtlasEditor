@@ -189,23 +189,6 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     labelParametersFormLayout.addRow("Input Label Map Volume: ", self.labelParamsInputSelectorLabel)
 
     #
-    # output label map selector
-    #
-    self.labelParamsOutputSelectorLabel = slicer.qMRMLNodeComboBox()
-    self.labelParamsOutputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
-    self.labelParamsOutputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
-    self.labelParamsOutputSelectorLabel.selectNodeUponCreation = True
-    self.labelParamsOutputSelectorLabel.addEnabled = True
-    self.labelParamsOutputSelectorLabel.renameEnabled = True
-    self.labelParamsOutputSelectorLabel.removeEnabled = True
-    self.labelParamsOutputSelectorLabel.noneEnabled = True
-    self.labelParamsOutputSelectorLabel.showHidden = False
-    self.labelParamsOutputSelectorLabel.showChildNodeTypes = False
-    self.labelParamsOutputSelectorLabel.setMRMLScene( slicer.mrmlScene )
-    self.labelParamsOutputSelectorLabel.setToolTip( "Pick the output label map to the algorithm." )
-    labelParametersFormLayout.addRow("Output Label Map Volume: ", self.labelParamsOutputSelectorLabel)
-
-    #
     # input label map selector
     #
     self.labelParamsInputFiducialSelector = slicer.qMRMLNodeComboBox()
@@ -234,6 +217,23 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.view = qt.QTableView()
     self.view.sortingEnabled = True
     labelParametersFormLayout.addWidget(self.view)
+
+    #
+    # output label map selector
+    #
+    self.labelParamsOutputSelectorLabel = slicer.qMRMLNodeComboBox()
+    self.labelParamsOutputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.labelParamsOutputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
+    self.labelParamsOutputSelectorLabel.selectNodeUponCreation = True
+    self.labelParamsOutputSelectorLabel.addEnabled = True
+    self.labelParamsOutputSelectorLabel.renameEnabled = True
+    self.labelParamsOutputSelectorLabel.removeEnabled = True
+    self.labelParamsOutputSelectorLabel.noneEnabled = True
+    self.labelParamsOutputSelectorLabel.showHidden = False
+    self.labelParamsOutputSelectorLabel.showChildNodeTypes = False
+    self.labelParamsOutputSelectorLabel.setMRMLScene( slicer.mrmlScene )
+    self.labelParamsOutputSelectorLabel.setToolTip( "Pick the output label map to the algorithm." )
+    labelParametersFormLayout.addRow("Output Label Map Volume: ", self.labelParamsOutputSelectorLabel)
 
     #
     # Apply Button
@@ -419,6 +419,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.inputSelectorPosterior.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
     self.outputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
     self.enablePosteriorCheckBox.connect('clicked(bool)', self.onEnablePosteriorSelect)
+    self.labelParamsRelabelButton.connect('clicked(bool)', self.onRelabelApplyButton)
 
     # Add vertical spacer
     self.layout.addStretch(1)
@@ -450,6 +451,11 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
                            self.labelParamsInputFiducialSelector.currentNode())
     self.populateStats()
 
+  def onRelabelApplyButton(self):
+    self.logic.runRelabelOutputLabelMap(self.labelParamsInputSelectorLabel.currentNode(),
+                                        self.labelParamsOutputSelectorLabel.currentNode().GetName(),
+                                        self.items)
+
   def onApplyButton(self):
 
     print("Merge Apply button selected")
@@ -474,7 +480,6 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     else:
       self.inputSelectorPosterior.setStyleSheet("color: rgb(0,0,0)")
       self.posteriorThreshold.setStyleSheet("color: rgb(0,0,0)")
-
 
   def populateStats(self):
     self.tableColumnNames = ['Label Number', 'Label Name', 'Square Diff of Means']
@@ -623,19 +628,19 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     seedList = self.createSeedList(inputFiducialNode, inputT1VolumeNode)
     inputLabelImage = self.getSitkInt16ImageFromSlicer(inputLabelName)
     suspiciousLabel = self.getLabel(inputLabelImage, seedList)
-    connectedThresholdOutput = self.runConnectedThresholdImageFilter(suspiciousLabel, seedList, inputLabelImage)
+    self.connectedThresholdOutput = self.runConnectedThresholdImageFilter(suspiciousLabel, seedList, inputLabelImage)
 
     inputT1VolumeImage = self.getSitkInt16ImageFromSlicer(inputT1VolumeNode.GetName())
     inputT2VolumeImage = self.getSitkInt16ImageFromSlicer(inputT2VolumeNode.GetName())
 
-    dialatedBinaryLabelMap = self.dialateLabelMap(connectedThresholdOutput)
+    dialatedBinaryLabelMap = self.dialateLabelMap(self.connectedThresholdOutput)
     reducedLabelMapImage = sitk.Multiply(dialatedBinaryLabelMap, inputLabelImage)
 
     reducedLabelMapT1LabelStats = self.getLabelStatsObject(inputT1VolumeImage, reducedLabelMapImage)
     reducedLabelMapT2LabelStats = self.getLabelStatsObject(inputT1VolumeImage, reducedLabelMapImage)
     targetLabels = reducedLabelMapT1LabelStats.GetLabels()
 
-    labelImageWithoutSuspiciousIslandPixels = self.relabel(inputLabelImage, connectedThresholdOutput, 0)
+    labelImageWithoutSuspiciousIslandPixels = self.relabel(inputLabelImage, self.connectedThresholdOutput, 0)
 
     T1LabelStats = self.getLabelStatsObject(inputT1VolumeImage, labelImageWithoutSuspiciousIslandPixels)
     T2LabelStats = self.getLabelStatsObject(inputT2VolumeImage, labelImageWithoutSuspiciousIslandPixels)
@@ -676,8 +681,9 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     myFilter.SetUpper(label)
     myFilter.SetSeedList(seedList)
     output = myFilter.Execute(inputLabelImage)
+    castedOutput = sitk.Cast(output, sitk.sitkInt16)
 
-    return output
+    return castedOutput
 
   def dialateLabelMap(self, inputLabelImage):
     myFilter = sitk.BinaryDilateImageFilter()
@@ -722,6 +728,17 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       squareRootDiffLabelDict[int(targetLabel)] = squareRootDiff
 
     return squareRootDiffLabelDict
+
+  def runRelabelOutputLabelMap(self, inputLabelNode, outputLabelNodeName, items):
+    inputLabelNodeLUTNodeID = inputLabelNode.GetDisplayNode().GetColorNodeID()
+    for item in items:
+      if item.checkState() == 2:
+        print('the checked item is', item.text(), int(item.text()))
+        labelImage = self.getSitkInt16ImageFromSlicer(inputLabelNode.GetName())
+        relabeledImage = self.relabel(labelImage, self.connectedThresholdOutput, 1013)
+        su.PushLabel(self.connectedThresholdOutput, 'connectedThresholdOutput', overwrite=True)
+        su.PushLabel(relabeledImage, outputLabelNodeName, overwrite=True)
+        self.setLabelLUT(outputLabelNodeName, inputLabelNodeLUTNodeID)
 
   def printLabelStatistics(self, labelStatsObject):
     for val in labelStatsObject.GetLabels():
