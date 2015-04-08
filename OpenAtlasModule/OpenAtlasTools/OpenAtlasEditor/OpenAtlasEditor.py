@@ -439,6 +439,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
                            self.labelParamsInputT1VolumeSelector.currentNode(),
                            self.labelParamsInputT2VolumeSelector.currentNode(),
                            self.labelParamsInputFiducialSelector.currentNode())
+    self.populateStats()
 
   def onApplyButton(self):
 
@@ -464,6 +465,61 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     else:
       self.inputSelectorPosterior.setStyleSheet("color: rgb(0,0,0)")
       self.posteriorThreshold.setStyleSheet("color: rgb(0,0,0)")
+
+
+  def populateStats(self):
+    self.tableColumnNames = ['Label', 'Label Name', 'Square Diff of Means']
+
+    if not self.logic:
+      return
+    displayNode = self.labelParamsInputSelectorLabel.currentNode().GetDisplayNode()
+    colorNode = displayNode.GetColorNode()
+    lut = colorNode.GetLookupTable()
+    self.items = []
+    self.model = qt.QStandardItemModel()
+    self.view.setModel(self.model)
+    self.view.verticalHeader().visible = False
+    row = 0
+    for i in self.logic.squareRootDiffLabelDict.keys():
+      color = qt.QColor()
+      rgb = lut.GetTableValue(i)
+      color.setRgb(rgb[0]*255, rgb[1]*255, rgb[2]*255)
+      item = qt.QStandardItem()
+      item.setData(color,qt.Qt.DecorationRole)
+      item.setToolTip(colorNode.GetColorName(i))
+      self.model.setItem(row, 0, item)
+      self.items.append(item)
+
+      # write Label NUmber column
+      item = qt.QStandardItem()
+      item.setData(float(i), qt.Qt.DisplayRole)
+      item.setToolTip(colorNode.GetColorName(i))
+      self.model.setItem(row, 1, item)
+      self.items.append(item)
+
+      # write Label Name column
+      item = qt.QStandardItem()
+      item.setData(colorNode.GetColorName(i), qt.Qt.DisplayRole)
+      item.setToolTip(colorNode.GetColorName(i))
+      self.model.setItem(row, 2, item)
+      self.items.append(item)
+
+      # write Square Diff of Means column
+      item = qt.QStandardItem()
+      item.setData(float(self.logic.squareRootDiffLabelDict[i]), qt.Qt.DisplayRole)
+      item.setToolTip(colorNode.GetColorName(i))
+      self.model.setItem(row, 3, item)
+      self.items.append(item)
+
+      row += 1
+
+    self.view.setColumnWidth(0,30)
+    self.model.setHeaderData(0,1," ")
+    col = 1
+    for k in self.tableColumnNames:
+      self.view.setColumnWidth(col,10*len(k))
+      self.model.setHeaderData(col,1,k)
+      col += 1
 
 #
 # OpenAtlasEditorLogic
@@ -578,12 +634,12 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     T2LabelStats = self.getLabelStatsObject(inputT2VolumeImage, labelImageWithoutSuspiciousIslandPixels)
 
     self.printLabelStatistics(reducedLabelMapT1LabelStats)
-    squareRootDiffLabelDict = self.calculateLabelIntensityDifferenceValue(
+    self.squareRootDiffLabelDict = self.calculateLabelIntensityDifferenceValue(
                               reducedLabelMapT1LabelStats.GetMean(int(suspiciousLabel)),
                               reducedLabelMapT2LabelStats.GetMean(int(suspiciousLabel)),
                               targetLabels, T1LabelStats, T2LabelStats)
 
-    print squareRootDiffLabelDict
+    print self.squareRootDiffLabelDict
 
     return True
 
