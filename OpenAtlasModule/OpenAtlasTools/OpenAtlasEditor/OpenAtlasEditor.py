@@ -480,7 +480,8 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.view.setModel(self.model)
     self.view.verticalHeader().visible = False
     row = 0
-    for i in self.logic.squareRootDiffLabelDict.keys():
+    labelDict = self.logic.squareRootDiffLabelDict
+    for i in sorted(labelDict, key=labelDict.get, reverse=False):
       color = qt.QColor()
       rgb = lut.GetTableValue(i)
       color.setRgb(rgb[0]*255, rgb[1]*255, rgb[2]*255)
