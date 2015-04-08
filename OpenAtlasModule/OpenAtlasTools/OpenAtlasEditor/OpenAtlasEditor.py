@@ -5,6 +5,7 @@ from slicer.ScriptedLoadableModule import *
 import Editor
 import SimpleITK as sitk
 import sitkUtils as su
+import math
 
 #
 # OpenAtlasEditor
@@ -567,7 +568,6 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     su.PushLabel(connectedThresholdOutput, 'connectedThresholdOutput')
     su.PushLabel(dialatedBinaryLabelMap, 'dialatedBinaryLabelMap')
     su.PushLabel(reducedLabelMapImage, 'reducedLabelMapImage')
-    su.PushForeground(reducedVolumeImage, 'reducedVolumeImage')
 
     reducedLabelMapLabelStats = self.getLabelStatsObject(inputT1VolumeImage, reducedLabelMapImage)
     T1LabelStats = self.getLabelStatsObject(inputT1VolumeImage, inputLabelImage)
@@ -615,6 +615,34 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     castedOutput = sitk.Cast(output, sitk.sitkInt16)
 
     return castedOutput
+
+  def calculateLabelIntensityDifferenceValue(self, listOfLabels, suspiciousLabel,
+                                             T1LabelStats, T2LabelStats):
+    """
+    Calculates a measurement for each label that is on the border of the suspicious label.
+    This value is the square root of the sum of the squared difference in the average T1
+    intensity values and the squared difference in the average T2 intensity values of the
+    two islands in the comparison. The calculated value for each border label will later be
+    sorted in ascending order - meaning that the smallest value has the "closest" average
+    intensity to the suspicious label.
+    """
+
+    squareRootDiffLabelDict = dict()
+
+    for targetLabel in listOfLabels:
+      averageT1IntensitySuspiciousLabel = T1LabelStats.GetMean(suspiciousLabel)
+      averageT1IntensityTargetLabel = T1LabelStats.GetMean(targetLabel)
+
+      averageT2IntensitySuspiciousLabel = T2LabelStats.GetMean(suspiciousLabel)
+      averageT2IntensityTargetLabel = T2LabelStats.GetMean(targetLabel)
+
+      squareDiffAverageT1 = math.pow(averageT1IntensitySuspiciousLabel - averageT1IntensityTargetLabel, 2)
+      squareDiffAverageT2 = math.pow(averageT2IntensitySuspiciousLabel - averageT2IntensityTargetLabel, 2)
+      squareRootDiff = math.sqrt(squareDiffAverageT1 + squareDiffAverageT2)
+
+      squareRootDiffLabelDict[targetLabel] = squareRootDiff
+
+    return squareRootDiffLabelDict
 
   def printLabelStatistics(self, labelStatsObject):
     for val in labelStatsObject.GetLabels():
