@@ -640,7 +640,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     reducedLabelMapT2LabelStats = self.getLabelStatsObject(inputT1VolumeImage, reducedLabelMapImage)
     targetLabels = reducedLabelMapT1LabelStats.GetLabels()
 
-    labelImageWithoutSuspiciousIslandPixels = self.relabel(inputLabelImage, self.connectedThresholdOutput, 0)
+    labelImageWithoutSuspiciousIslandPixels = self.relabelImage(inputLabelImage, self.connectedThresholdOutput, 0)
 
     T1LabelStats = self.getLabelStatsObject(inputT1VolumeImage, labelImageWithoutSuspiciousIslandPixels)
     T2LabelStats = self.getLabelStatsObject(inputT2VolumeImage, labelImageWithoutSuspiciousIslandPixels)
@@ -733,10 +733,9 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     inputLabelNodeLUTNodeID = inputLabelNode.GetDisplayNode().GetColorNodeID()
     for item in items:
       if item.checkState() == 2:
-        print('the checked item is', item.text(), int(item.text()))
+        print('Changing the suspicious label to', int(item.text()))
         labelImage = self.getSitkInt16ImageFromSlicer(inputLabelNode.GetName())
-        relabeledImage = self.relabel(labelImage, self.connectedThresholdOutput, 1013)
-        su.PushLabel(self.connectedThresholdOutput, 'connectedThresholdOutput', overwrite=True)
+        relabeledImage = self.relabelImage(labelImage, self.connectedThresholdOutput, int(item.text()))
         su.PushLabel(relabeledImage, outputLabelNodeName, overwrite=True)
         self.setLabelLUT(outputLabelNodeName, inputLabelNodeLUTNodeID)
 
