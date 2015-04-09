@@ -189,6 +189,23 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     labelParametersFormLayout.addRow("Input Label Map Volume: ", self.labelParamsInputSelectorLabel)
 
     #
+    # output label map selector
+    #
+    self.labelParamsOutputSelectorLabel = slicer.qMRMLNodeComboBox()
+    self.labelParamsOutputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.labelParamsOutputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
+    self.labelParamsOutputSelectorLabel.selectNodeUponCreation = True
+    self.labelParamsOutputSelectorLabel.addEnabled = True
+    self.labelParamsOutputSelectorLabel.renameEnabled = True
+    self.labelParamsOutputSelectorLabel.removeEnabled = True
+    self.labelParamsOutputSelectorLabel.noneEnabled = True
+    self.labelParamsOutputSelectorLabel.showHidden = False
+    self.labelParamsOutputSelectorLabel.showChildNodeTypes = False
+    self.labelParamsOutputSelectorLabel.setMRMLScene( slicer.mrmlScene )
+    self.labelParamsOutputSelectorLabel.setToolTip( "Pick the output label map to the algorithm." )
+    labelParametersFormLayout.addRow("Output Label Map Volume: ", self.labelParamsOutputSelectorLabel)
+
+    #
     # Add fiducial Button
     #
     self.labelParamsAddFiducialButton = qt.QPushButton("Add fiducial point")
@@ -210,23 +227,6 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.view = qt.QTableView()
     self.view.sortingEnabled = True
     labelParametersFormLayout.addWidget(self.view)
-
-    #
-    # output label map selector
-    #
-    self.labelParamsOutputSelectorLabel = slicer.qMRMLNodeComboBox()
-    self.labelParamsOutputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
-    self.labelParamsOutputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
-    self.labelParamsOutputSelectorLabel.selectNodeUponCreation = True
-    self.labelParamsOutputSelectorLabel.addEnabled = True
-    self.labelParamsOutputSelectorLabel.renameEnabled = True
-    self.labelParamsOutputSelectorLabel.removeEnabled = True
-    self.labelParamsOutputSelectorLabel.noneEnabled = True
-    self.labelParamsOutputSelectorLabel.showHidden = False
-    self.labelParamsOutputSelectorLabel.showChildNodeTypes = False
-    self.labelParamsOutputSelectorLabel.setMRMLScene( slicer.mrmlScene )
-    self.labelParamsOutputSelectorLabel.setToolTip( "Pick the output label map to the algorithm." )
-    labelParametersFormLayout.addRow("Output Label Map Volume: ", self.labelParamsOutputSelectorLabel)
 
     #
     # Apply Button
@@ -620,6 +620,11 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
   def runAddFiducial(self):
     fiducialName = 'DustCleanupModuleFiducialNode'
+
+    fiducialNode = slicer.util.getNode(fiducialName)
+    if fiducialNode != None:
+      slicer.mrmlScene.RemoveNode(fiducialNode)
+
     markupsLogic = slicer.modules.markups.logic()
     markupsLogic.AddNewFiducialNode(fiducialName)
 
