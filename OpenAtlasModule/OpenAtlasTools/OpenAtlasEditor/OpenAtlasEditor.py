@@ -189,21 +189,14 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     labelParametersFormLayout.addRow("Input Label Map Volume: ", self.labelParamsInputSelectorLabel)
 
     #
-    # input label map selector
+    # Add fiducial Button
     #
-    self.labelParamsInputFiducialSelector = slicer.qMRMLNodeComboBox()
-    self.labelParamsInputFiducialSelector.nodeTypes = ( ("vtkMRMLMarkupsFiducialNode"), "" )
-    self.labelParamsInputFiducialSelector.selectNodeUponCreation = True
-    self.labelParamsInputFiducialSelector.addEnabled = True
-    self.labelParamsInputFiducialSelector.renameEnabled = True
-    self.labelParamsInputFiducialSelector.removeEnabled = True
-    self.labelParamsInputFiducialSelector.noneEnabled = False
-    self.labelParamsInputFiducialSelector.showHidden = False
-    self.labelParamsInputFiducialSelector.showChildNodeTypes = False
-    self.labelParamsInputFiducialSelector.setMRMLScene( slicer.mrmlScene )
-    self.labelParamsInputFiducialSelector.setToolTip( "Pick the input label map to the algorithm." )
-    labelParametersFormLayout.addRow("Input Fiducial Node: ", self.labelParamsInputFiducialSelector)
-    
+    self.labelParamsAddFiducialButton = qt.QPushButton("Add fiducial point")
+    self.labelParamsAddFiducialButton.toolTip = "Add the fiducial point."
+    self.labelParamsAddFiducialButton.enabled = True
+    self.labelParamsAddFiducialButton.setStyleSheet("background-color: rgb(230,241,255)")
+    labelParametersFormLayout.addRow("Step 1:", self.labelParamsAddFiducialButton)
+
     #
     # Calculate Square Diffs of Means Button
     #
@@ -211,7 +204,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.labelParamsApplyButton.toolTip = "Run the algorithm."
     self.labelParamsApplyButton.enabled = True
     self.labelParamsApplyButton.setStyleSheet("background-color: rgb(230,241,255)")
-    labelParametersFormLayout.addRow(self.labelParamsApplyButton)
+    labelParametersFormLayout.addRow("Step 2:", self.labelParamsApplyButton)
 
     # model and view for stats table
     self.view = qt.QTableView()
@@ -242,7 +235,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.labelParamsRelabelButton.toolTip = "Run the algorithm."
     self.labelParamsRelabelButton.enabled = True
     self.labelParamsRelabelButton.setStyleSheet("background-color: rgb(230,241,255)")
-    labelParametersFormLayout.addRow(self.labelParamsRelabelButton)
+    labelParametersFormLayout.addRow("Step 3:", self.labelParamsRelabelButton)
 
     #
     # Merge Suspicious Label to Target Label Parameters Area
@@ -419,6 +412,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.inputSelectorPosterior.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
     self.outputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
     self.enablePosteriorCheckBox.connect('clicked(bool)', self.onEnablePosteriorSelect)
+    self.labelParamsAddFiducialButton.connect('clicked(bool)', self.onlabelParamsAddFiducialButton)
     self.labelParamsRelabelButton.connect('clicked(bool)', self.onRelabelApplyButton)
 
     # Add vertical spacer
@@ -447,9 +441,11 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
   def onLabelParamsApplyButton(self):
     self.logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
                            self.labelParamsInputT1VolumeSelector.currentNode(),
-                           self.labelParamsInputT2VolumeSelector.currentNode(),
-                           self.labelParamsInputFiducialSelector.currentNode())
+                           self.labelParamsInputT2VolumeSelector.currentNode())
     self.populateStats()
+
+  def onlabelParamsAddFiducialButton(self):
+    self.logic.runAddFiducial()
 
   def onRelabelApplyButton(self):
     self.logic.runRelabelOutputLabelMap(self.labelParamsInputSelectorLabel.currentNode(),
@@ -622,10 +618,21 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     return True
 
-  def runGetRegionInfo(self, inputLabelName, inputT1VolumeNode,
-                       inputT2VolumeNode, inputFiducialNode):
+  def runAddFiducial(self):
+    fiducialName = 'DustCleanupModuleFiducialNode'
+    markupsLogic = slicer.modules.markups.logic()
+    markupsLogic.AddNewFiducialNode(fiducialName)
 
-    seedList = self.createSeedList(inputFiducialNode, inputT1VolumeNode)
+    placeModePersistence = 0
+    markupsLogic.StartPlaceMode(placeModePersistence)
+
+  def runGetRegionInfo(self, inputLabelName, inputT1VolumeNode,
+                       inputT2VolumeNode):
+
+    fiducialName = 'DustCleanupModuleFiducialNode'
+    fiducialNode = slicer.util.getNode(fiducialName)
+
+    seedList = self.createSeedList(fiducialNode, inputT1VolumeNode)
     inputLabelImage = self.getSitkInt16ImageFromSlicer(inputLabelName)
     suspiciousLabel = self.getLabel(inputLabelImage, seedList)
     self.connectedThresholdOutput = self.runConnectedThresholdImageFilter(suspiciousLabel, seedList, inputLabelImage)
@@ -764,7 +771,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       ijkPoint = self.getIJKFromRAS(rasPoint, ras2ijk)
       seedList.append(ijkPoint)
 
-    return seedList
+    return seedList[0:1]
 
   def getRas2ijkMatrix(self, volumeNode):
     ras2ijk = vtk.vtkMatrix4x4()
