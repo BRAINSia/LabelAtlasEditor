@@ -226,6 +226,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     # model and view for stats table
     self.view = qt.QTableView()
     self.view.sortingEnabled = True
+    self.view.setMaximumHeight(0)
     labelParametersFormLayout.addWidget(self.view)
 
     #
@@ -525,6 +526,8 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
 
       row += 1
 
+    self.view.setMinimumHeight(self.view.rowHeight(0) * 5 + 10)
+    self.view.setMaximumHeight(self.view.rowHeight(0) * 5 + 10)
     self.view.setColumnWidth(0,30)
     self.model.setHeaderData(0,1," ")
     col = 1
