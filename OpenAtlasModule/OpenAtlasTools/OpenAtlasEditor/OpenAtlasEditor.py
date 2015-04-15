@@ -268,7 +268,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.targetLabel = ctk.ctkSliderWidget()
     self.targetLabel.singleStep = 1.0
     self.targetLabel.minimum = 0.0
-    self.targetLabel.maximum = 10000.0
+    self.targetLabel.maximum = 30000.0
     self.targetLabel.value = 24.0
     self.targetLabel.setToolTip('Set the target label (label to change suspicious label to)')
     parametersFormLayout.addRow("Target Label: ", self.targetLabel)
@@ -276,7 +276,7 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.suspiciousLabel = ctk.ctkSliderWidget()
     self.suspiciousLabel.singleStep = 1.0
     self.suspiciousLabel.minimum = 0.0
-    self.suspiciousLabel.maximum = 10000.0
+    self.suspiciousLabel.maximum = 30000.0
     self.suspiciousLabel.value = 999.0
     self.suspiciousLabel.setToolTip('Set the suspicious label (will be changed to target '
                                     'label if connected in largest region')
