@@ -602,7 +602,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       posterior = su.PullFromSlicer(inputPosteriorName)
       thresholdedPosterior = sitk.BinaryThreshold(posterior, posteriorThreshold)
       newRegion = (relabeledConnectedRegion == 1) * thresholdedPosterior
-    newLabel = self.relabel(labelImage, newRegion > 0, targetLabel)
+    newLabel = self.relabelImage(labelImage, newRegion > 0, targetLabel)
     return newLabel
 
   def setLabelLUT(self, nodeName, colorNodeID):
@@ -755,10 +755,13 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
         self.setLabelLUT(outputLabelNodeName, inputLabelNodeLUTNodeID)
 
   def relabelImage(self, labelImage, newRegion, newLabel):
-    negatedMask = sitk.BinaryNot(newRegion)
-    negatedImage = sitk.Mask(labelImage, negatedMask)
-    maskTimesNewLabel = sitk.Multiply(newRegion, newLabel)
+    castedLabelImage = sitk.Cast(labelImage, sitk.sitkInt16)
+    castedNewRegion = sitk.Cast(newRegion, sitk.sitkInt16)
+    negatedMask = sitk.BinaryNot(castedNewRegion)
+    negatedImage = sitk.Mask(castedLabelImage, negatedMask)
+    maskTimesNewLabel = sitk.Multiply(castedNewRegion, newLabel)
     relabeledImage = sitk.Add(negatedImage, maskTimesNewLabel)
+
     return relabeledImage
 
   def printLabelStatistics(self, labelStatsObject):
