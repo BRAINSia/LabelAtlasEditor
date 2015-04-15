@@ -582,12 +582,6 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     return True
 
-  def relabel(self, labelImage, newRegion, newLabel):
-    newLabelImage = sitk.Cast(labelImage, sitk.sitkInt32) * sitk.Cast((newRegion == 0), sitk.sitkInt32) \
-                    + sitk.Cast(newLabel * (newRegion > 0), sitk.sitkInt32)
-    newCastedLabelImage = sitk.Cast(newLabelImage, sitk.sitkInt16)
-    return newCastedLabelImage
-
   def mergeLabels(self, labelImageName, targetLabel, suspiciousLabel,
                   enablePosterior, inputPosteriorName, posteriorThreshold):
     labelImage = su.PullFromSlicer(labelImageName)
