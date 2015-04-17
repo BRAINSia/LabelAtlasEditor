@@ -581,7 +581,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     self.delayDisplay('Running')
 
-    newLabel = self.mergeLabels(inputLabelName, targetLabel, suspiciousLabel,
+    newLabel = self.mergeLabels(inputLabelName, targetLabel, suspiciousLabel, mergeAllIslandsChecked,
                                 enablePosterior, inputPosteriorName, posteriorThreshold)
 
     inputNode = slicer.util.getNode(pattern=inputLabelName)
@@ -592,7 +592,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     return True
 
-  def mergeLabels(self, labelImageName, targetLabel, suspiciousLabel,
+  def mergeLabels(self, labelImageName, targetLabel, suspiciousLabel, mergeAllIslandsChecked,
                   enablePosterior, inputPosteriorName, posteriorThreshold):
     labelImage = su.PullFromSlicer(labelImageName)
     targetAndSuspiciousMergedLabel = ((labelImage == targetLabel) + (labelImage == suspiciousLabel))
