@@ -283,6 +283,14 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     parametersFormLayout.addRow("Suspicious Label: ", self.suspiciousLabel)
 
     #
+    # check box to trigger using the posterior parameters
+    #
+    self.mergeAllIslandCheckBox = qt.QCheckBox()
+    self.mergeAllIslandCheckBox.checked = 0
+    self.mergeAllIslandCheckBox.setToolTip("If checked, will use posterior image and threshold")
+    parametersFormLayout.addRow("Merge suspicious pixels connected to any \ntarget island (not just largest island)", self.mergeAllIslandCheckBox)
+
+    #
     # Posterior Parameters Area
     #
     self.posteriorParametersCollapsibleButton = ctk.ctkCollapsibleButton()
