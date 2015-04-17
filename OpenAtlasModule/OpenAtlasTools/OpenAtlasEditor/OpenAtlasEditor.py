@@ -600,19 +600,23 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     relabeledConnectedRegion = sitk.RelabelComponent(connectedRegion)
     if not enablePosterior:
       if mergeAllIslandsChecked == False:
-        newRegion = (relabeledConnectedRegion == 1)
+        newRegion = sitk.BinaryThreshold(relabeledConnectedRegion, 1, 1)
+        # newRegion = (relabeledConnectedRegion == 1)
         print('no thresh used')
       else:
-        newRegion = (relabeledConnectedRegion >= 1)
+        newRegion = sitk.BinaryThreshold(relabeledConnectedRegion, 1)
+        # newRegion = (relabeledConnectedRegion >= 1)
         print('no thresh used')
     else:
       print('threshold used: ', posteriorThreshold)
       posterior = su.PullFromSlicer(inputPosteriorName)
       thresholdedPosterior = sitk.BinaryThreshold(posterior, posteriorThreshold)
       if mergeAllIslandsChecked == False:
-        newRegion = (relabeledConnectedRegion == 1) * thresholdedPosterior
+        relabeledMask = sitk.BinaryThreshold(relabeledConnectedRegion, 1, 1)
+        newRegion = relabeledMask * thresholdedPosterior
       else:
-        newRegion = (relabeledConnectedRegion >= 1) * thresholdedPosterior
+        relabeledMask = sitk.BinaryThreshold(relabeledConnectedRegion, 1)
+        newRegion = relabeledMask * thresholdedPosterior
     newLabel = self.relabelImage(labelImage, newRegion > 0, targetLabel)
     return newLabel
 
