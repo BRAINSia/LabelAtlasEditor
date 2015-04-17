@@ -603,7 +603,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
         newRegion = (relabeledConnectedRegion == 1)
         print('no thresh used')
       else:
-        newRegion = (relabeledConnectedRegion > 1)
+        newRegion = (relabeledConnectedRegion >= 1)
         print('no thresh used')
     else:
       print('threshold used: ', posteriorThreshold)
@@ -612,7 +612,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       if mergeAllIslandsChecked == False:
         newRegion = (relabeledConnectedRegion == 1) * thresholdedPosterior
       else:
-        newRegion = (relabeledConnectedRegion > 1) * thresholdedPosterior
+        newRegion = (relabeledConnectedRegion >= 1) * thresholdedPosterior
     newLabel = self.relabelImage(labelImage, newRegion > 0, targetLabel)
     return newLabel
 
