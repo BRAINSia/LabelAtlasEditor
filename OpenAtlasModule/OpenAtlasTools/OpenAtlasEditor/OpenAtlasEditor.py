@@ -597,7 +597,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     labelImage = su.PullFromSlicer(labelImageName)
     targetLabelMask = sitk.BinaryThreshold(labelImage, targetLabel, targetLabel)
     suspiciousLabelMask = sitk.BinaryThreshold(labelImage, suspiciousLabel, suspiciousLabel)
-    targetAndSuspiciousMergedLabel = (targetLabelMask + suspiciousLabelMask)
+    targetAndSuspiciousMergedLabel = sitk.Add(targetLabelMask, suspiciousLabelMask)
     connectedRegion = sitk.ConnectedComponent(targetAndSuspiciousMergedLabel, True)
     relabeledConnectedRegion = sitk.RelabelComponent(connectedRegion)
     if not enablePosterior:
