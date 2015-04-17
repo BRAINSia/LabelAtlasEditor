@@ -468,11 +468,13 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
     if not self.enablePosteriorCheckBox.checked:
       self.logic.run(self.inputSelectorLabel.currentNode().GetName(),
               self.outputSelectorLabel.currentNode().GetName(),
-              self.targetLabel.value, self.suspiciousLabel.value)
+              self.targetLabel.value, self.suspiciousLabel.value,
+              self.mergeAllIslandCheckBox.checked)
     else:
       self.logic.run(self.inputSelectorLabel.currentNode().GetName(),
               self.outputSelectorLabel.currentNode().GetName(),
               self.targetLabel.value, self.suspiciousLabel.value,
+              self.mergeAllIslandCheckBox.checked,
               enablePosterior=True,
               inputPosteriorName=self.inputSelectorPosterior.currentNode().GetName(),
               posteriorThreshold=self.posteriorThreshold.value)
@@ -571,7 +573,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       return False
     return True
 
-  def run(self, inputLabelName, outputLabelName, targetLabel, suspiciousLabel,
+  def run(self, inputLabelName, outputLabelName, targetLabel, suspiciousLabel, mergeAllIslandsChecked,
           enablePosterior=False, inputPosteriorName=None, posteriorThreshold=None):
     """
     Run the actual algorithm
