@@ -616,7 +616,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
       else:
         relabeledMask = sitk.BinaryThreshold(relabeledConnectedRegion, 1)
       newRegion = sitk.Multiply(relabeledMask, thresholdedPosterior)
-    newLabel = self.relabelImage(labelImage, newRegion > 0, targetLabel)
+    newLabel = self.relabelImage(labelImage, newRegion, targetLabel)
     return newLabel
 
   def setLabelLUT(self, nodeName, colorNodeID):
