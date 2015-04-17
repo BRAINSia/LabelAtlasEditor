@@ -595,7 +595,9 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
   def mergeLabels(self, labelImageName, targetLabel, suspiciousLabel, mergeAllIslandsChecked,
                   enablePosterior, inputPosteriorName, posteriorThreshold):
     labelImage = su.PullFromSlicer(labelImageName)
-    targetAndSuspiciousMergedLabel = ((labelImage == targetLabel) + (labelImage == suspiciousLabel))
+    targetLabelMask = sitk.BinaryThreshold(labelImage, targetLabel, targetLabel)
+    suspiciousLabelMask = sitk.BinaryThreshold(labelImage, suspiciousLabel, suspiciousLabel)
+    targetAndSuspiciousMergedLabel = (targetLabelMask + suspiciousLabelMask)
     connectedRegion = sitk.ConnectedComponent(targetAndSuspiciousMergedLabel, True)
     relabeledConnectedRegion = sitk.RelabelComponent(connectedRegion)
     if not enablePosterior:
