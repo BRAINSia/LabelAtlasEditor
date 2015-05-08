@@ -666,7 +666,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
     reducedLabelMapImage = sitk.Multiply(dialatedBinaryLabelMap, inputLabelImage)
 
     reducedLabelMapT1LabelStats = self.getLabelStatsObject(inputT1VolumeImage, reducedLabelMapImage)
-    reducedLabelMapT2LabelStats = self.getLabelStatsObject(inputT1VolumeImage, reducedLabelMapImage)
+    reducedLabelMapT2LabelStats = self.getLabelStatsObject(inputT2VolumeImage, reducedLabelMapImage)
     targetLabels = reducedLabelMapT1LabelStats.GetLabels()
 
     labelImageWithoutSuspiciousIslandPixels = self.relabelImage(inputLabelImage, self.connectedThresholdOutput, 0)
