@@ -65,7 +65,8 @@ class DustCleanup():
     reducedLabelMapImage = sitk.Multiply(dialatedBinaryLabelMap, inputLabelImage)
 
     reducedLabelMapT1LabelStats = self.getLabelStatsObject(inputVolumeImage, reducedLabelMapImage)
-    targetLabels = reducedLabelMapT1LabelStats.GetLabels()
+    # targetLabels = reducedLabelMapT1LabelStats.GetLabels()
+    targetLabels = self.getLabelListFromLabelStatsObject(reducedLabelMapT1LabelStats)
     return targetLabels
 
   def dialateLabelMap(self, inputLabelImage):
