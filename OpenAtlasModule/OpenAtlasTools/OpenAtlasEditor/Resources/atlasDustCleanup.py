@@ -27,9 +27,9 @@ class DustCleanup():
     labelStatsT2WithInputLabelImage = self.getLabelStatsObject(inputT2VolumeImage, inputLabelImage)
     labelList = self.getLabelListFromLabelStatsObject(labelStatsT1WithRelabeledConnectedRegion)
     labelList.reverse()
-    print labelList[700:702]
+    print labelList
 
-    for currentLabel in labelList[700:702]:
+    for currentLabel in labelList:
       islandVoxelCount = labelStatsT1WithRelabeledConnectedRegion.GetCount(currentLabel)
       print islandVoxelCount
       if islandVoxelCount <= self.maximumIslandVoxelCount:
@@ -107,7 +107,11 @@ class DustCleanup():
       #   continue
       averageT1IntensityTargetLabel = T1LabelStats.GetMean(targetLabel)
       averageT2IntensityTargetLabel = T2LabelStats.GetMean(targetLabel)
-
+      print('targetLabel', targetLabel)
+      print('averageT1IntensityTargetLabel', averageT1IntensityTargetLabel)
+      print('averageT1IntensitySuspiciousLabel', averageT1IntensitySuspiciousLabel)
+      print('averageT2IntensityTargetLabel', averageT2IntensityTargetLabel)
+      print('averageT2IntensitySuspiciousLabel', averageT2IntensitySuspiciousLabel)
       squareDiffAverageT1 = math.pow(averageT1IntensitySuspiciousLabel -
                                      averageT1IntensityTargetLabel, 2)
       squareDiffAverageT2 = math.pow(averageT2IntensitySuspiciousLabel -
