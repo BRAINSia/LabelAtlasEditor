@@ -132,6 +132,9 @@ class DustCleanup():
 
     return relabeledImage
 
+  def getDictKeysListSortedByValue(self, val):
+    return sorted(val, key=val.get)
+
 if __name__ == '__main__':
   from docopt import docopt
   arguments = docopt(__doc__)
