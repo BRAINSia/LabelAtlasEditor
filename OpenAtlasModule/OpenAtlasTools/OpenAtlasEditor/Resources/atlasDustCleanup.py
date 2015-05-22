@@ -21,21 +21,25 @@ class DustCleanup():
     relabeledConnectedRegion = self.thresholdAtlas(inputLabelImage)
     inputT1VolumeImage = sitk.ReadImage(self.inputT1Path),
     inputT2VolumeImage = sitk.ReadImage(self.inputT2Path)
-    labelStatsT1 = self.getLabelStatsObject(inputT1VolumeImage, relabeledConnectedRegion)
-    labelStatsT2 = self.getLabelStatsObject(inputT2VolumeImage, relabeledConnectedRegion)
-    labelList = self.getLabelListFromLabelStatsObject(labelStatsT1)
+    labelStatsT1WithRelabeledConnectedRegion = self.getLabelStatsObject(inputT1VolumeImage, relabeledConnectedRegion)
+    labelStatsT2WithRelabeledConnectedRegion = self.getLabelStatsObject(inputT2VolumeImage, relabeledConnectedRegion)
+    labelStatsT1WithInputLabelImage = self.getLabelStatsObject(inputT1VolumeImage, inputLabelImage)
+    labelStatsT2WithInputLabelImage = self.getLabelStatsObject(inputT2VolumeImage, inputLabelImage)
+    labelList = self.getLabelListFromLabelStatsObject(labelStatsT1WithRelabeledConnectedRegion)
     labelList.reverse()
     print labelList[0:2]
 
     for currentLabel in labelList[0:2]:
-      islandVoxelCount = labelStatsT1.GetCount(currentLabel)
+      islandVoxelCount = labelStatsT1WithRelabeledConnectedRegion.GetCount(currentLabel)
       print islandVoxelCount
       if islandVoxelCount <= self.maximumIslandVoxelCount:
-        meanT1Intesity = labelStatsT1.GetMean(currentLabel)
-        meanT2Intesity = labelStatsT2.GetMean(currentLabel)
+        meanT1Intesity = labelStatsT1WithRelabeledConnectedRegion.GetMean(currentLabel)
+        meanT2Intesity = labelStatsT2WithRelabeledConnectedRegion.GetMean(currentLabel)
         targetLabels = self.getTargetLabels(inputLabelImage, inputT1VolumeImage, currentLabel)
         diffDict = self.calculateLabelIntensityDifferenceValue(meanT1Intesity, meanT2Intesity,
-                                                               targetLabels, labelStatsT1, labelStatsT2)
+                                                               targetLabels,
+                                                               labelStatsT1WithInputLabelImage,
+                                                               labelStatsT2WithInputLabelImage)
         print diffDict
 
   def thresholdAtlas(self, inputLabelImage):
