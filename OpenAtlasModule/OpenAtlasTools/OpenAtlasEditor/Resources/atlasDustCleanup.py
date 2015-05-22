@@ -122,6 +122,15 @@ class DustCleanup():
 
     return squareRootDiffLabelDict
 
+  def relabelImage(self, labelImage, newRegion, newLabel):
+    castedLabelImage = sitk.Cast(labelImage, sitk.sitkInt16)
+    castedNewRegion = sitk.Cast(newRegion, sitk.sitkInt16)
+    negatedMask = sitk.BinaryNot(castedNewRegion)
+    negatedImage = sitk.Mask(castedLabelImage, negatedMask)
+    maskTimesNewLabel = sitk.Multiply(castedNewRegion, newLabel)
+    relabeledImage = sitk.Add(negatedImage, maskTimesNewLabel)
+
+    return relabeledImage
 
 if __name__ == '__main__':
   from docopt import docopt
