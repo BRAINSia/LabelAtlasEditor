@@ -29,6 +29,7 @@ class DustCleanup():
     labelList.reverse()
     print labelList
 
+    outputLabelImage = sitk.Image(inputLabelImage)
     for currentLabel in labelList:
       islandVoxelCount = labelStatsT1WithRelabeledConnectedRegion.GetCount(currentLabel)
       print islandVoxelCount
@@ -42,6 +43,10 @@ class DustCleanup():
                                                                labelStatsT1WithInputLabelImage,
                                                                labelStatsT2WithInputLabelImage)
         print diffDict
+        sortedLabelList = self.getDictKeysListSortedByValue(diffDict)
+        currentLabelBinaryThresholdImage = sitk.BinaryThreshold(relabeledConnectedRegion, currentLabel, currentLabel)
+        outputLabelImage = self.relabelImage(outputLabelImage, currentLabelBinaryThresholdImage, sortedLabelList[0])
+      sitk.WriteImage(outputLabelImage, self.outputAtlasPath)
 
   def thresholdAtlas(self, inputLabelImage):
     binaryThresholdImage = sitk.BinaryThreshold(inputLabelImage, self.label, self.label)
