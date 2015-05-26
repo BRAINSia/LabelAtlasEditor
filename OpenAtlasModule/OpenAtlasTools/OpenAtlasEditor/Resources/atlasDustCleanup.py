@@ -25,8 +25,6 @@ class DustCleanup():
     inputT2VolumeImage = sitk.ReadImage(self.inputT2Path)
     labelStatsT1WithRelabeledConnectedRegion = self.getLabelStatsObject(inputT1VolumeImage, relabeledConnectedRegion)
     labelStatsT2WithRelabeledConnectedRegion = self.getLabelStatsObject(inputT2VolumeImage, relabeledConnectedRegion)
-    labelStatsT1WithInputLabelImage = self.getLabelStatsObject(inputT1VolumeImage, inputLabelImage)
-    labelStatsT2WithInputLabelImage = self.getLabelStatsObject(inputT2VolumeImage, inputLabelImage)
     labelList = self.getLabelListFromLabelStatsObject(labelStatsT1WithRelabeledConnectedRegion)
     labelList.reverse()
     print labelList
@@ -41,9 +39,8 @@ class DustCleanup():
         targetLabels = self.getTargetLabels(inputLabelImage, relabeledConnectedRegion, inputT1VolumeImage, currentLabel)
         print targetLabels
         diffDict = self.calculateLabelIntensityDifferenceValue(meanT1Intesity, meanT2Intesity,
-                                                               targetLabels,
-                                                               labelStatsT1WithInputLabelImage,
-                                                               labelStatsT2WithInputLabelImage)
+                                                               targetLabels, inputT1VolumeImage,
+                                                               inputT2VolumeImage, outputLabelImage)
         print diffDict
         if self.forceSuspiciousLabelChange:
           diffDict.pop(self.label)
@@ -109,7 +106,8 @@ class DustCleanup():
 
   def calculateLabelIntensityDifferenceValue(self, averageT1IntensitySuspiciousLabel,
                                              averageT2IntensitySuspiciousLabel,
-                                             targetLabels, T1LabelStats, T2LabelStats):
+                                             targetLabels, inputT1VolumeImage,
+                                             inputT2VolumeImage, inputLabelImage):
     """
     Calculates a measurement for each label that is on the border of the suspicious label.
     This value is the square root of the sum of the squared difference in the average T1
@@ -120,12 +118,14 @@ class DustCleanup():
     """
 
     squareRootDiffLabelDict = dict()
+    labelStatsT1WithInputLabelImage = self.getLabelStatsObject(inputT1VolumeImage, inputLabelImage)
+    labelStatsT2WithInputLabelImage = self.getLabelStatsObject(inputT2VolumeImage, inputLabelImage)
 
     for targetLabel in targetLabels:
       # if targetLabel == 0:
       #   continue
-      averageT1IntensityTargetLabel = T1LabelStats.GetMean(targetLabel)
-      averageT2IntensityTargetLabel = T2LabelStats.GetMean(targetLabel)
+      averageT1IntensityTargetLabel = labelStatsT1WithInputLabelImage.GetMean(targetLabel)
+      averageT2IntensityTargetLabel = labelStatsT2WithInputLabelImage.GetMean(targetLabel)
       print('targetLabel', targetLabel)
       print('averageT1IntensityTargetLabel', averageT1IntensityTargetLabel)
       print('averageT1IntensitySuspiciousLabel', averageT1IntensitySuspiciousLabel)
