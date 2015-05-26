@@ -1,5 +1,5 @@
 """
-usage: atlasDustCleanup.py --inputAtlasPath=<argument> --outputAtlasPath=<argument> --inputT1Path=<argument> --inputT2Path=<argument> --label=<argument> --maximumIslandVoxelCount=<argument>
+usage: atlasDustCleanup.py --inputAtlasPath=<argument> --outputAtlasPath=<argument> --inputT1Path=<argument> --inputT2Path=<argument> --label=<argument> --maximumIslandVoxelCount=<argument> [--useFullyConnectedInConnectedComponentFilter]
 atlasDustCleanup.py -h | --help
 """
 
@@ -15,6 +15,7 @@ class DustCleanup():
     self.inputT2Path = arguments['--inputT2Path']
     self.label = int(arguments['--label'])
     self.maximumIslandVoxelCount = int(arguments['--maximumIslandVoxelCount'])
+    self.useFullyConnectedInConnectedComponentFilter = arguments['--useFullyConnectedInConnectedComponentFilter']
 
   def main(self):
     inputLabelImage = sitk.Cast(sitk.ReadImage(self.inputAtlasPath), sitk.sitkInt16)
@@ -50,7 +51,10 @@ class DustCleanup():
 
   def thresholdAtlas(self, inputLabelImage):
     binaryThresholdImage = sitk.BinaryThreshold(inputLabelImage, self.label, self.label)
-    connectedRegion = sitk.ConnectedComponent(binaryThresholdImage, True)
+    if not self.useFullyConnectedInConnectedComponentFilter:
+      connectedRegion = sitk.ConnectedComponent(binaryThresholdImage, fullyConnected=False)
+    else:
+      connectedRegion = sitk.ConnectedComponent(binaryThresholdImage, fullyConnected=True)
     relabeledConnectedRegion = sitk.RelabelComponent(connectedRegion)
     return relabeledConnectedRegion
 
