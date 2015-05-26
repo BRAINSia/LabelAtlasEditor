@@ -80,10 +80,10 @@ class DustCleanup():
     castedCurrentLabelBinaryThresholdImage = sitk.Cast(currentLabelBinaryThresholdImage, sitk.sitkInt16)
 
     dialatedBinaryLabelMap = self.dialateLabelMap(castedCurrentLabelBinaryThresholdImage)
-    reducedLabelMapImage = sitk.Multiply(dialatedBinaryLabelMap, inputLabelImage)
+    outsideValue = -1
+    reducedLabelMapImage = sitk.Mask(inputLabelImage, dialatedBinaryLabelMap, outsideValue=outsideValue)
 
     reducedLabelMapT1LabelStats = self.getLabelStatsObject(inputVolumeImage, reducedLabelMapImage)
-    # targetLabels = reducedLabelMapT1LabelStats.GetLabels()
     targetLabels = self.getLabelListFromLabelStatsObject(reducedLabelMapT1LabelStats)
     return targetLabels
 
