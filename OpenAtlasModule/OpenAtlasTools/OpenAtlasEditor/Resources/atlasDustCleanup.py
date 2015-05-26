@@ -85,6 +85,12 @@ class DustCleanup():
 
     reducedLabelMapT1LabelStats = self.getLabelStatsObject(inputVolumeImage, reducedLabelMapImage)
     targetLabels = self.getLabelListFromLabelStatsObject(reducedLabelMapT1LabelStats)
+    targetLabels = self.removeOutsideValueFromTargetLabels(targetLabels, outsideValue)
+    return targetLabels
+
+  def removeOutsideValueFromTargetLabels(self, targetLabels, outsideValue):
+    if outsideValue in targetLabels:
+      targetLabels.remove(outsideValue)
     return targetLabels
 
   def dialateLabelMap(self, inputLabelImage):
