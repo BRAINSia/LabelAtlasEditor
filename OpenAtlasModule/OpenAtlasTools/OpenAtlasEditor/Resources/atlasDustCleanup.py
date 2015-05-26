@@ -1,5 +1,5 @@
 """
-usage: atlasDustCleanup.py --inputAtlasPath=<argument> --outputAtlasPath=<argument> --inputT1Path=<argument> --inputT2Path=<argument> --label=<argument> --maximumIslandVoxelCount=<argument> [--useFullyConnectedInConnectedComponentFilter]
+usage: atlasDustCleanup.py --inputAtlasPath=<argument> --outputAtlasPath=<argument> --inputT1Path=<argument> --inputT2Path=<argument> --label=<argument> --maximumIslandVoxelCount=<argument> [--useFullyConnectedInConnectedComponentFilter] [--forceSuspiciousLabelChange]
 atlasDustCleanup.py -h | --help
 """
 
@@ -16,6 +16,7 @@ class DustCleanup():
     self.label = int(arguments['--label'])
     self.maximumIslandVoxelCount = int(arguments['--maximumIslandVoxelCount'])
     self.useFullyConnectedInConnectedComponentFilter = arguments['--useFullyConnectedInConnectedComponentFilter']
+    self.forceSuspiciousLabelChange = arguments['--forceSuspiciousLabelChange']
 
   def main(self):
     inputLabelImage = sitk.Cast(sitk.ReadImage(self.inputAtlasPath), sitk.sitkInt16)
@@ -43,6 +44,9 @@ class DustCleanup():
                                                                targetLabels,
                                                                labelStatsT1WithInputLabelImage,
                                                                labelStatsT2WithInputLabelImage)
+        print diffDict
+        if self.forceSuspiciousLabelChange:
+          diffDict.pop(self.label)
         print diffDict
         sortedLabelList = self.getDictKeysListSortedByValue(diffDict)
         currentLabelBinaryThresholdImage = sitk.BinaryThreshold(relabeledConnectedRegion, currentLabel, currentLabel)
