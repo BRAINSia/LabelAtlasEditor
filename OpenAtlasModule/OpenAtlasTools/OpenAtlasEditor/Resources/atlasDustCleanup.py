@@ -19,8 +19,8 @@ class DustCleanup():
     self.forceSuspiciousLabelChange = arguments['--forceSuspiciousLabelChange']
 
   def main(self):
-    inputLabelImage = sitk.Cast(sitk.ReadImage(self.inputAtlasPath), sitk.sitkInt16)
-    relabeledConnectedRegion = sitk.Cast(self.thresholdAtlas(inputLabelImage), sitk.sitkInt16)
+    labelImage = sitk.Cast(sitk.ReadImage(self.inputAtlasPath), sitk.sitkInt16)
+    relabeledConnectedRegion = sitk.Cast(self.thresholdAtlas(labelImage), sitk.sitkInt16)
     inputT1VolumeImage = sitk.ReadImage(self.inputT1Path)
     inputT2VolumeImage = sitk.ReadImage(self.inputT2Path)
     labelStatsT1WithRelabeledConnectedRegion = self.getLabelStatsObject(inputT1VolumeImage, relabeledConnectedRegion)
@@ -29,29 +29,30 @@ class DustCleanup():
     labelList.reverse()
     print labelList
 
-    outputLabelImage = sitk.Image(inputLabelImage)
     for currentLabel in labelList:
+      print "The current label is", currentLabel
       islandVoxelCount = labelStatsT1WithRelabeledConnectedRegion.GetCount(currentLabel)
       print islandVoxelCount
       if islandVoxelCount <= self.maximumIslandVoxelCount:
         meanT1Intesity = labelStatsT1WithRelabeledConnectedRegion.GetMean(currentLabel)
         meanT2Intesity = labelStatsT2WithRelabeledConnectedRegion.GetMean(currentLabel)
-        targetLabels = self.getTargetLabels(inputLabelImage, relabeledConnectedRegion, inputT1VolumeImage, currentLabel)
+        targetLabels = self.getTargetLabels(labelImage, relabeledConnectedRegion, inputT1VolumeImage, currentLabel)
         print targetLabels
         diffDict = self.calculateLabelIntensityDifferenceValue(meanT1Intesity, meanT2Intesity,
                                                                targetLabels, inputT1VolumeImage,
-                                                               inputT2VolumeImage, outputLabelImage)
+                                                               inputT2VolumeImage, labelImage)
         print diffDict
         if self.forceSuspiciousLabelChange:
           diffDict.pop(self.label)
         print diffDict
         sortedLabelList = self.getDictKeysListSortedByValue(diffDict)
         currentLabelBinaryThresholdImage = sitk.BinaryThreshold(relabeledConnectedRegion, currentLabel, currentLabel)
-        outputLabelImage = self.relabelImage(outputLabelImage, currentLabelBinaryThresholdImage, sortedLabelList[0])
-      sitk.WriteImage(outputLabelImage, self.outputAtlasPath)
+        labelImage = self.relabelImage(labelImage, currentLabelBinaryThresholdImage, sortedLabelList[0])
+    labelImage = sitk.Cast(labelImage, sitk.sitkUInt8)
+    sitk.WriteImage(labelImage, self.outputAtlasPath)
 
-  def thresholdAtlas(self, inputLabelImage):
-    binaryThresholdImage = sitk.BinaryThreshold(inputLabelImage, self.label, self.label)
+  def thresholdAtlas(self, labelImage):
+    binaryThresholdImage = sitk.BinaryThreshold(labelImage, self.label, self.label)
     if not self.useFullyConnectedInConnectedComponentFilter:
       connectedRegion = sitk.ConnectedComponent(binaryThresholdImage, fullyConnected=False)
     else:
@@ -72,13 +73,13 @@ class DustCleanup():
       compontentLabels = labelStatsObject.GetValidLabels()
     return list(compontentLabels)
 
-  def getTargetLabels(self, inputLabelImage, relabeledConnectedRegion, inputVolumeImage, currentLabel):
+  def getTargetLabels(self, labelImage, relabeledConnectedRegion, inputVolumeImage, currentLabel):
     currentLabelBinaryThresholdImage = sitk.BinaryThreshold(relabeledConnectedRegion, currentLabel, currentLabel)
     castedCurrentLabelBinaryThresholdImage = sitk.Cast(currentLabelBinaryThresholdImage, sitk.sitkInt16)
 
     dialatedBinaryLabelMap = self.dialateLabelMap(castedCurrentLabelBinaryThresholdImage)
     outsideValue = -1
-    reducedLabelMapImage = sitk.Mask(inputLabelImage, dialatedBinaryLabelMap, outsideValue=outsideValue)
+    reducedLabelMapImage = sitk.Mask(labelImage, dialatedBinaryLabelMap, outsideValue=outsideValue)
 
     reducedLabelMapT1LabelStats = self.getLabelStatsObject(inputVolumeImage, reducedLabelMapImage)
     targetLabels = self.getLabelListFromLabelStatsObject(reducedLabelMapT1LabelStats)
@@ -148,7 +149,7 @@ class DustCleanup():
     negatedImage = sitk.Mask(castedLabelImage, negatedMask)
     maskTimesNewLabel = sitk.Multiply(castedNewRegion, newLabel)
     relabeledImage = sitk.Add(negatedImage, maskTimesNewLabel)
-
+    print("Relabeled block to", newLabel)
     return relabeledImage
 
   def getDictKeysListSortedByValue(self, val):
