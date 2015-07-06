@@ -30,11 +30,13 @@ class DustCleanup():
     inputT1VolumeImage = sitk.ReadImage(self.inputT1Path)
     inputT2VolumeImage = sitk.ReadImage(self.inputT2Path)
     labelsList = self.getLabelsList(inputT1VolumeImage, labelImage)
+    print labelsList
 
   def getLabelsList(self, volumeImage, labelImage):
     labelStatsObject = self.getLabelStatsObject(volumeImage, labelImage)
     labelsList = self.getLabelListFromLabelStatsObject(labelStatsObject)
-    # if
+    if self.excludeLabelsList:
+      labelsList = self.removeLabelsFromLabelsList(labelsList, self.excludeLabelsList)
     return labelsList
 
   def removeLabelsFromLabelsList(self, labelsList, excludeList):
@@ -180,4 +182,4 @@ if __name__ == '__main__':
   arguments = docopt(__doc__)
   print arguments
   Object = DustCleanup(arguments)
-  # Object.main()
+  Object.main()
