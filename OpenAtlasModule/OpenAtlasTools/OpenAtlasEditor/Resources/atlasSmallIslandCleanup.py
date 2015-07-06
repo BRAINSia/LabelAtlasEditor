@@ -36,8 +36,9 @@ class DustCleanup():
     labelStatsObject = self.getLabelStatsObject(volumeImage, labelImage)
     labelsList = self.getLabelListFromLabelStatsObject(labelStatsObject)
     if self.excludeLabelsList:
-      labelsList = self.removeLabelsFromLabelsList(labelsList, self.excludeLabelsList)
-    return labelsList
+      return self.removeLabelsFromLabelsList(labelsList, self.excludeLabelsList)
+    if self.includeLabelsList:
+      return self.verifyIncludeLabelsList(labelsList, self.includeLabelsList)
 
   def removeLabelsFromLabelsList(self, labelsList, excludeList):
     for val in excludeList:
@@ -46,6 +47,15 @@ class DustCleanup():
       except ValueError:
         print "WARNING: Label value", val, "is NOT a valid label in the input atlas:", self.inputAtlasPath
     return labelsList
+
+  def verifyIncludeLabelsList(self, labelsList, includeList):
+    verifiedList = list()
+    for val in includeList:
+      if val in labelsList:
+        verifiedList.append(val)
+      else:
+        print "WARNING: Label value", val, "is NOT a valid label in the input atlas:", self.inputAtlasPath
+    return verifiedList
 
   def relabelCurrentLabel(self, labelImage, inputT1VolumeImage, inputT2VolumeImage, label):
     relabeledConnectedRegion = sitk.Cast(self.thresholdAtlas(labelImage), sitk.sitkInt16)
