@@ -1,5 +1,5 @@
 """
-usage: atlasSmallIslandCleanup.py --inputAtlasPath=<argument> --outputAtlasPath=<argument> --inputT1Path=<argument> --inputT2Path=<argument> --label=<argument> --maximumIslandVoxelCount=<argument> [--useFullyConnectedInConnectedComponentFilter] [--forceSuspiciousLabelChange]
+usage: atlasSmallIslandCleanup.py --inputAtlasPath=<argument> --outputAtlasPath=<argument> --inputT1Path=<argument> --inputT2Path=<argument> (--includeLabelsList=<argument> | --excludeLabelsList=<argument>) --maximumIslandVoxelCount=<argument> [--useFullyConnectedInConnectedComponentFilter] [--forceSuspiciousLabelChange]
 atlasSmallIslandCleanup.py -h | --help
 """
 
@@ -13,16 +13,40 @@ class DustCleanup():
     self.outputAtlasPath = arguments['--outputAtlasPath']
     self.inputT1Path = arguments['--inputT1Path']
     self.inputT2Path = arguments['--inputT2Path']
-    self.label = int(arguments['--label'])
+    self.includeLabelsList = self.evalInputListArg(arguments['--includeLabelsList'])
+    self.excludeLabelsList = self.evalInputListArg(arguments['--excludeLabelsList'])
     self.maximumIslandVoxelCount = int(arguments['--maximumIslandVoxelCount'])
     self.useFullyConnectedInConnectedComponentFilter = arguments['--useFullyConnectedInConnectedComponentFilter']
     self.forceSuspiciousLabelChange = arguments['--forceSuspiciousLabelChange']
 
+  def evalInputListArg(self, inputArg):
+    if inputArg:
+      return map(int, inputArg.split(','))
+    else:
+      return None
+
   def main(self):
     labelImage = sitk.Cast(sitk.ReadImage(self.inputAtlasPath), sitk.sitkInt16)
-    relabeledConnectedRegion = sitk.Cast(self.thresholdAtlas(labelImage), sitk.sitkInt16)
     inputT1VolumeImage = sitk.ReadImage(self.inputT1Path)
     inputT2VolumeImage = sitk.ReadImage(self.inputT2Path)
+    labelsList = self.getLabelsList(inputT1VolumeImage, labelImage)
+
+  def getLabelsList(self, volumeImage, labelImage):
+    labelStatsObject = self.getLabelStatsObject(volumeImage, labelImage)
+    labelsList = self.getLabelListFromLabelStatsObject(labelStatsObject)
+    # if
+    return labelsList
+
+  def removeLabelsFromLabelsList(self, labelsList, excludeList):
+    for val in excludeList:
+      try:
+        labelsList.remove(val)
+      except ValueError:
+        print "WARNING: Label value", val, "is NOT a valid label in the input atlas:", self.inputAtlasPath
+    return labelsList
+
+  def relabelCurrentLabel(self, labelImage, inputT1VolumeImage, inputT2VolumeImage, label):
+    relabeledConnectedRegion = sitk.Cast(self.thresholdAtlas(labelImage), sitk.sitkInt16)
     labelStatsT1WithRelabeledConnectedRegion = self.getLabelStatsObject(inputT1VolumeImage, relabeledConnectedRegion)
     labelStatsT2WithRelabeledConnectedRegion = self.getLabelStatsObject(inputT2VolumeImage, relabeledConnectedRegion)
     labelList = self.getLabelListFromLabelStatsObject(labelStatsT1WithRelabeledConnectedRegion)
@@ -156,4 +180,4 @@ if __name__ == '__main__':
   arguments = docopt(__doc__)
   print arguments
   Object = DustCleanup(arguments)
-  Object.main()
+  # Object.main()
