@@ -18,6 +18,7 @@ class DustCleanup():
     self.maximumIslandVoxelCount = int(arguments['--maximumIslandVoxelCount'])
     self.useFullyConnectedInConnectedComponentFilter = arguments['--useFullyConnectedInConnectedComponentFilter']
     self.forceSuspiciousLabelChange = arguments['--forceSuspiciousLabelChange']
+    self.islandStatistics = {'Total': {'numberOfIslandsCleaned': 0, 'numberOfIslands': 0}}
 
   def evalInputListArg(self, inputArg):
     if inputArg:
@@ -30,7 +31,10 @@ class DustCleanup():
     inputT1VolumeImage = sitk.ReadImage(self.inputT1Path)
     inputT2VolumeImage = sitk.ReadImage(self.inputT2Path)
     labelsList = self.getLabelsList(inputT1VolumeImage, labelImage)
-    print labelsList
+    for label in labelsList:
+      labelImage = self.relabelCurrentLabel(labelImage, inputT1VolumeImage, inputT2VolumeImage, label)
+    self.printIslandStatistics()
+    sitk.WriteImage(labelImage, self.outputAtlasPath)
 
   def getLabelsList(self, volumeImage, labelImage):
     labelStatsObject = self.getLabelStatsObject(volumeImage, labelImage)
@@ -57,13 +61,21 @@ class DustCleanup():
         print "WARNING: Label value", val, "is NOT a valid label in the input atlas:", self.inputAtlasPath
     return verifiedList
 
+  def printIslandStatistics(self):
+    print "-"*50
+    print "Label, numberOfIslandsCleaned, numberOfIslands"
+    for val in sorted(self.islandStatistics):
+      print ','.join([str(val), str(self.islandStatistics[val]['numberOfIslandsCleaned']),
+                     str(self.islandStatistics[val]['numberOfIslands'])])
+
   def relabelCurrentLabel(self, labelImage, inputT1VolumeImage, inputT2VolumeImage, label):
-    relabeledConnectedRegion = sitk.Cast(self.thresholdAtlas(labelImage), sitk.sitkInt16)
+    relabeledConnectedRegion = sitk.Cast(self.thresholdAtlas(labelImage, label), sitk.sitkInt16)
     labelStatsT1WithRelabeledConnectedRegion = self.getLabelStatsObject(inputT1VolumeImage, relabeledConnectedRegion)
     labelStatsT2WithRelabeledConnectedRegion = self.getLabelStatsObject(inputT2VolumeImage, relabeledConnectedRegion)
     labelList = self.getLabelListFromLabelStatsObject(labelStatsT1WithRelabeledConnectedRegion)
     labelList.reverse()
-    print "Number of islands:", len(labelList)
+
+    numberOfIslandsCleaned = 0
 
     for currentLabel in labelList:
       islandVoxelCount = labelStatsT1WithRelabeledConnectedRegion.GetCount(currentLabel)
@@ -75,17 +87,20 @@ class DustCleanup():
                                                                targetLabels, inputT1VolumeImage,
                                                                inputT2VolumeImage, labelImage)
         if self.forceSuspiciousLabelChange:
-          diffDict.pop(self.label)
-        print currentLabel, islandVoxelCount, diffDict
+          diffDict.pop(label)
         sortedLabelList = self.getDictKeysListSortedByValue(diffDict)
         currentLabelBinaryThresholdImage = sitk.BinaryThreshold(relabeledConnectedRegion, currentLabel, currentLabel)
         labelImage = self.relabelImage(labelImage, currentLabelBinaryThresholdImage, sortedLabelList[0])
+        numberOfIslandsCleaned += 1
       else:
-        continue
-    sitk.WriteImage(labelImage, self.outputAtlasPath)
+        break
+    self.islandStatistics[label] = {'numberOfIslands': len(labelList), 'numberOfIslandsCleaned': numberOfIslandsCleaned}
+    self.islandStatistics['Total']['numberOfIslands'] += len(labelList)
+    self.islandStatistics['Total']['numberOfIslandsCleaned'] += numberOfIslandsCleaned
+    return labelImage
 
-  def thresholdAtlas(self, labelImage):
-    binaryThresholdImage = sitk.BinaryThreshold(labelImage, self.label, self.label)
+  def thresholdAtlas(self, labelImage, label):
+    binaryThresholdImage = sitk.BinaryThreshold(labelImage, label, label)
     if not self.useFullyConnectedInConnectedComponentFilter:
       connectedRegion = sitk.ConnectedComponent(binaryThresholdImage, fullyConnected=False)
     else:
