@@ -1,5 +1,5 @@
 """
-usage: atlasSmallIslandCleanup.py --inputAtlasPath=<argument> --outputAtlasPath=<argument> --inputT1Path=<argument> --inputT2Path=<argument> (--includeLabelsList=<argument> | --excludeLabelsList=<argument>) --maximumIslandVoxelCount=<argument> [--useFullyConnectedInConnectedComponentFilter] [--forceSuspiciousLabelChange]
+usage: atlasSmallIslandCleanup.py --inputAtlasPath=<argument> --outputAtlasPath=<argument> --inputT1Path=<argument> --inputT2Path=<argument> [--includeLabelsList=<argument> | --excludeLabelsList=<argument>] --maximumIslandVoxelCount=<argument> [--useFullyConnectedInConnectedComponentFilter] [--forceSuspiciousLabelChange]
 atlasSmallIslandCleanup.py -h | --help
 """
 
@@ -43,6 +43,7 @@ class DustCleanup():
       return self.removeLabelsFromLabelsList(labelsList, self.excludeLabelsList)
     if self.includeLabelsList:
       return self.verifyIncludeLabelsList(labelsList, self.includeLabelsList)
+    return labelsList
 
   def removeLabelsFromLabelsList(self, labelsList, excludeList):
     for val in excludeList:
