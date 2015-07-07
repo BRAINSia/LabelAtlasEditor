@@ -126,7 +126,7 @@ class DustCleanup():
     currentLabelBinaryThresholdImage = sitk.BinaryThreshold(relabeledConnectedRegion, currentLabel, currentLabel)
     castedCurrentLabelBinaryThresholdImage = sitk.Cast(currentLabelBinaryThresholdImage, sitk.sitkInt16)
 
-    dialatedBinaryLabelMap = self.dialateLabelMap(castedCurrentLabelBinaryThresholdImage)
+    dialatedBinaryLabelMap = self.dialateLabelMap(castedCurrentLabelBinaryThresholdImage, 1)
     outsideValue = -1
     reducedLabelMapImage = sitk.Mask(labelImage, dialatedBinaryLabelMap, outsideValue=outsideValue)
 
@@ -140,13 +140,13 @@ class DustCleanup():
       targetLabels.remove(outsideValue)
     return targetLabels
 
-  def dialateLabelMap(self, inputLabelImage):
+  def dialateLabelMap(self, inputLabelImage, kernelRadius):
     myFilter = sitk.BinaryDilateImageFilter()
     myFilter.SetBackgroundValue(0.0)
     myFilter.SetBoundaryToForeground(False)
     myFilter.SetDebug(False)
     myFilter.SetForegroundValue(1.0)
-    myFilter.SetKernelRadius((1, 1, 1))
+    myFilter.SetKernelRadius((kernelRadius, kernelRadius, kernelRadius))
     myFilter.SetKernelType(2)  # Kernel Type=Box
     myFilter.SetNumberOfThreads(8)
     output = myFilter.Execute(inputLabelImage)
