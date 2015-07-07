@@ -27,28 +27,25 @@ class DustCleanup():
     labelStatsT2WithRelabeledConnectedRegion = self.getLabelStatsObject(inputT2VolumeImage, relabeledConnectedRegion)
     labelList = self.getLabelListFromLabelStatsObject(labelStatsT1WithRelabeledConnectedRegion)
     labelList.reverse()
-    print labelList
+    print "Number of islands:", len(labelList)
 
     for currentLabel in labelList:
-      print "The current label is", currentLabel
       islandVoxelCount = labelStatsT1WithRelabeledConnectedRegion.GetCount(currentLabel)
-      print islandVoxelCount
       if islandVoxelCount <= self.maximumIslandVoxelCount:
         meanT1Intesity = labelStatsT1WithRelabeledConnectedRegion.GetMean(currentLabel)
         meanT2Intesity = labelStatsT2WithRelabeledConnectedRegion.GetMean(currentLabel)
         targetLabels = self.getTargetLabels(labelImage, relabeledConnectedRegion, inputT1VolumeImage, currentLabel)
-        print targetLabels
         diffDict = self.calculateLabelIntensityDifferenceValue(meanT1Intesity, meanT2Intesity,
                                                                targetLabels, inputT1VolumeImage,
                                                                inputT2VolumeImage, labelImage)
-        print diffDict
         if self.forceSuspiciousLabelChange:
           diffDict.pop(self.label)
-        print diffDict
+        print currentLabel, islandVoxelCount, diffDict
         sortedLabelList = self.getDictKeysListSortedByValue(diffDict)
         currentLabelBinaryThresholdImage = sitk.BinaryThreshold(relabeledConnectedRegion, currentLabel, currentLabel)
         labelImage = self.relabelImage(labelImage, currentLabelBinaryThresholdImage, sortedLabelList[0])
-    labelImage = sitk.Cast(labelImage, sitk.sitkUInt8)
+      else:
+        break
     sitk.WriteImage(labelImage, self.outputAtlasPath)
 
   def thresholdAtlas(self, labelImage):
@@ -127,11 +124,11 @@ class DustCleanup():
       #   continue
       averageT1IntensityTargetLabel = labelStatsT1WithInputLabelImage.GetMean(targetLabel)
       averageT2IntensityTargetLabel = labelStatsT2WithInputLabelImage.GetMean(targetLabel)
-      print('targetLabel', targetLabel)
-      print('averageT1IntensityTargetLabel', averageT1IntensityTargetLabel)
-      print('averageT1IntensitySuspiciousLabel', averageT1IntensitySuspiciousLabel)
-      print('averageT2IntensityTargetLabel', averageT2IntensityTargetLabel)
-      print('averageT2IntensitySuspiciousLabel', averageT2IntensitySuspiciousLabel)
+      # print('targetLabel', targetLabel)
+      # print('averageT1IntensityTargetLabel', averageT1IntensityTargetLabel)
+      # print('averageT1IntensitySuspiciousLabel', averageT1IntensitySuspiciousLabel)
+      # print('averageT2IntensityTargetLabel', averageT2IntensityTargetLabel)
+      # print('averageT2IntensitySuspiciousLabel', averageT2IntensitySuspiciousLabel)
       squareDiffAverageT1 = math.pow(averageT1IntensitySuspiciousLabel -
                                      averageT1IntensityTargetLabel, 2)
       squareDiffAverageT2 = math.pow(averageT2IntensitySuspiciousLabel -
@@ -149,7 +146,6 @@ class DustCleanup():
     negatedImage = sitk.Mask(castedLabelImage, negatedMask)
     maskTimesNewLabel = sitk.Multiply(castedNewRegion, newLabel)
     relabeledImage = sitk.Add(negatedImage, maskTimesNewLabel)
-    print("Relabeled block to", newLabel)
     return relabeledImage
 
   def getDictKeysListSortedByValue(self, val):
