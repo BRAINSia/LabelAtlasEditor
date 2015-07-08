@@ -87,6 +87,7 @@ class DustCleanup():
       labelStatsT1WithRelabeledConnectedRegion = self.getLabelStatsObject(inputT1VolumeImage, relabeledConnectedRegion)
       labelStatsT2WithRelabeledConnectedRegion = self.getLabelStatsObject(inputT2VolumeImage, relabeledConnectedRegion)
       labelList = self.getLabelListFromLabelStatsObject(labelStatsT1WithRelabeledConnectedRegion)
+      labelList.remove(0)  #remove background label from labelList
       labelList.reverse()
       print "labelList", labelList
 
