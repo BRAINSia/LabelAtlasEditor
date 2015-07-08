@@ -34,7 +34,7 @@ class DustCleanup():
     for label in labelsList:
       labelImage = self.relabelCurrentLabel(labelImage, inputT1VolumeImage, inputT2VolumeImage, label)
     self.printIslandStatistics()
-    sitk.WriteImage(sitk.Cast(labelImage, sitk.sitkUInt8), self.outputAtlasPath)
+    sitk.WriteImage(labelImage, self.outputAtlasPath)
 
   def getLabelsList(self, volumeImage, labelImage):
     labelStatsObject = self.getLabelStatsObject(volumeImage, labelImage)
@@ -76,12 +76,8 @@ class DustCleanup():
   def relabelCurrentLabel(self, labelImage, inputT1VolumeImage, inputT2VolumeImage, label):
 
     self.islandStatistics[label] = {'numberOfIslandsCleaned': 0}
-    print "*"*50
-    print "label", label
 
     for currentIslandSize in range(1, self.maximumIslandVoxelCount + 1):
-      print "-"*10
-      print "currentIslandSize", currentIslandSize
       maskForCurrentLabel = sitk.BinaryThreshold(labelImage, label, label)
       relabeledConnectedRegion = self.getRelabeldConnectedRegion(maskForCurrentLabel, currentIslandSize)
       labelStatsT1WithRelabeledConnectedRegion = self.getLabelStatsObject(inputT1VolumeImage, relabeledConnectedRegion)
@@ -89,7 +85,6 @@ class DustCleanup():
       labelList = self.getLabelListFromLabelStatsObject(labelStatsT1WithRelabeledConnectedRegion)
       labelList.remove(0)  #remove background label from labelList
       labelList.reverse()
-      print "labelList", labelList
 
       if currentIslandSize == 1: #use island size 1 to get # of islands since this label map is not dilated
         self.islandStatistics[label]['numberOfIslands'] = len(labelList)
@@ -99,12 +94,9 @@ class DustCleanup():
 
       for currentLabel in labelList:
         islandVoxelCount = labelStatsT1WithRelabeledConnectedRegion.GetCount(currentLabel)
-        print "currentLabel", currentLabel, "islandVoxelCount", islandVoxelCount
         if islandVoxelCount < currentIslandSize:
-          print "continuing: islandVoxelCount < currentIslandSize"
           continue
         elif islandVoxelCount == currentIslandSize and currentLabel != 1: #stop if you reach largest island
-          print "islandVoxelCount == currentIslandSize and currentLabel != 1"
           meanT1Intesity = labelStatsT1WithRelabeledConnectedRegion.GetMean(currentLabel)
           meanT2Intesity = labelStatsT2WithRelabeledConnectedRegion.GetMean(currentLabel)
           targetLabels = self.getTargetLabels(labelImage, relabeledConnectedRegion, inputT1VolumeImage, currentLabel)
@@ -112,14 +104,12 @@ class DustCleanup():
                                                                  targetLabels, inputT1VolumeImage,
                                                                  inputT2VolumeImage, labelImage)
           if self.forceSuspiciousLabelChange:
-            print label, diffDict
             diffDict.pop(label)
           sortedLabelList = self.getDictKeysListSortedByValue(diffDict)
           currentLabelBinaryThresholdImage = sitk.BinaryThreshold(relabeledConnectedRegion, currentLabel, currentLabel)
           labelImage = self.relabelImage(labelImage, currentLabelBinaryThresholdImage, sortedLabelList[0])
           numberOfIslandsCleaned += 1
         else:
-          print "breaking cause not (islandVoxelCount == currentIslandSize and currentLabel != 1)"
           break
 
       self.islandStatistics[label][currentIslandSize] = numberOfIslandsCleaned
@@ -142,7 +132,6 @@ class DustCleanup():
     return int(math.ceil(math.pow(currentIslandSize/((4./3.)*math.pi), (1./3.))))
 
   def runConnectedComponentsAndRelabel(self, binaryImage):
-    # binaryThresholdImage = sitk.BinaryThreshold(labelImage, label, label)
     if not self.useFullyConnectedInConnectedComponentFilter:
       connectedRegion = sitk.ConnectedComponent(binaryImage, fullyConnected=False)
     else:
@@ -217,11 +206,7 @@ class DustCleanup():
       #   continue
       averageT1IntensityTargetLabel = labelStatsT1WithInputLabelImage.GetMean(targetLabel)
       averageT2IntensityTargetLabel = labelStatsT2WithInputLabelImage.GetMean(targetLabel)
-      # print('targetLabel', targetLabel)
-      # print('averageT1IntensityTargetLabel', averageT1IntensityTargetLabel)
-      # print('averageT1IntensitySuspiciousLabel', averageT1IntensitySuspiciousLabel)
-      # print('averageT2IntensityTargetLabel', averageT2IntensityTargetLabel)
-      # print('averageT2IntensitySuspiciousLabel', averageT2IntensitySuspiciousLabel)
+
       squareDiffAverageT1 = math.pow(averageT1IntensitySuspiciousLabel -
                                      averageT1IntensityTargetLabel, 2)
       squareDiffAverageT2 = math.pow(averageT2IntensitySuspiciousLabel -
