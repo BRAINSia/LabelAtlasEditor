@@ -130,11 +130,16 @@ class DustCleanup():
 
   def getRelabeldConnectedRegion(self, maskForCurrentLabel, currentIslandSize):
     if currentIslandSize > 1:
-      dilatedMaskForCurrentLabel = self.dialateLabelMap(maskForCurrentLabel, currentIslandSize - 1)
+      dilationKernelRadius = self.calcDilationKernelRadius(currentIslandSize)
+      dilatedMaskForCurrentLabel = self.dialateLabelMap(maskForCurrentLabel, dilationKernelRadius)
       relabeledConnectedLabelMap = self.runConnectedComponentsAndRelabel(dilatedMaskForCurrentLabel)
       return sitk.Mask(relabeledConnectedLabelMap, maskForCurrentLabel, outsideValue=0)
     else:
       return self.runConnectedComponentsAndRelabel(maskForCurrentLabel)
+
+  def calcDilationKernelRadius(self, currentIslandSize):
+    # use the equation for the volume of a sphere to calculate the kernel radius value
+    return int(math.ceil(math.pow(currentIslandSize/((4./3.)*math.pi), (1./3.))))
 
   def runConnectedComponentsAndRelabel(self, binaryImage):
     # binaryThresholdImage = sitk.BinaryThreshold(labelImage, label, label)
