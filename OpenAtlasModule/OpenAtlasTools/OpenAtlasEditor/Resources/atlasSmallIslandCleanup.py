@@ -121,7 +121,7 @@ class DustCleanup():
   def getRelabeldConnectedRegion(self, maskForCurrentLabel, currentIslandSize):
     if currentIslandSize > 1:
       dilationKernelRadius = self.calcDilationKernelRadius(currentIslandSize)
-      dilatedMaskForCurrentLabel = self.dialateLabelMap(maskForCurrentLabel, dilationKernelRadius)
+      dilatedMaskForCurrentLabel = self.dilateLabelMap(maskForCurrentLabel, dilationKernelRadius)
       relabeledConnectedLabelMap = self.runConnectedComponentsAndRelabel(dilatedMaskForCurrentLabel)
       return sitk.Mask(relabeledConnectedLabelMap, maskForCurrentLabel, outsideValue=0)
     else:
@@ -156,9 +156,9 @@ class DustCleanup():
     currentLabelBinaryThresholdImage = sitk.BinaryThreshold(relabeledConnectedRegion, currentLabel, currentLabel)
     castedCurrentLabelBinaryThresholdImage = sitk.Cast(currentLabelBinaryThresholdImage, sitk.sitkInt16)
 
-    dialatedBinaryLabelMap = self.dialateLabelMap(castedCurrentLabelBinaryThresholdImage, 1)
+    dilatedBinaryLabelMap = self.dilateLabelMap(castedCurrentLabelBinaryThresholdImage, 1)
     outsideValue = -1
-    reducedLabelMapImage = sitk.Mask(labelImage, dialatedBinaryLabelMap, outsideValue=outsideValue)
+    reducedLabelMapImage = sitk.Mask(labelImage, dilatedBinaryLabelMap, outsideValue=outsideValue)
 
     reducedLabelMapT1LabelStats = self.getLabelStatsObject(inputVolumeImage, reducedLabelMapImage)
     targetLabels = self.getLabelListFromLabelStatsObject(reducedLabelMapT1LabelStats)
@@ -170,7 +170,7 @@ class DustCleanup():
       targetLabels.remove(outsideValue)
     return targetLabels
 
-  def dialateLabelMap(self, inputLabelImage, kernelRadius):
+  def dilateLabelMap(self, inputLabelImage, kernelRadius):
     myFilter = sitk.BinaryDilateImageFilter()
     myFilter.SetBackgroundValue(0.0)
     myFilter.SetBoundaryToForeground(False)
