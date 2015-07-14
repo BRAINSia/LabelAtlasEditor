@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 2.8.9)
 
-project(LabelAtlasTools)
+project(LabelAtlasEditor)
 
 #-----------------------------------------------------------------------------
 # Extension meta-information
-set(EXTENSION_HOMEPAGE "http://www.example.com/Slicer/Extensions/LabelAtlasTools")
+set(EXTENSION_HOMEPAGE "http://www.example.com/Slicer/Extensions/LabelAtlasEditor")
 set(EXTENSION_CATEGORY "Examples")
 set(EXTENSION_CONTRIBUTORS "Jessica Forbes (University of Iowa), Hans Johnson (University of Iowa)")
 set(EXTENSION_DESCRIPTION "Label atlases are utilized in medical imaging to segment an image into anatomical regions. Atlases often contain inaccuracies that will be propagated throughout the study if not identified and corrected. This Slicer module allows a user to visualize and efficiently edit errors in label atlases. ")
-set(EXTENSION_ICONURL "http://www.example.com/Slicer/Extensions/LabelAtlasTools.png")
-set(EXTENSION_SCREENSHOTURLS "http://www.example.com/Slicer/Extensions/LabelAtlasTools/Screenshots/1.png")
+set(EXTENSION_ICONURL "http://www.example.com/Slicer/Extensions/LabelAtlasEditor.png")
+set(EXTENSION_SCREENSHOTURLS "http://www.example.com/Slicer/Extensions/LabelAtlasEditor/Screenshots/1.png")
 
 #-----------------------------------------------------------------------------
 # Extension dependencies
