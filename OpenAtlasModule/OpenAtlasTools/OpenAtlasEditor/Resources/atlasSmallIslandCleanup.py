@@ -97,10 +97,10 @@ class DustCleanup():
         if islandVoxelCount < currentIslandSize:
           continue
         elif islandVoxelCount == currentIslandSize and currentLabel != 1: #stop if you reach largest island
-          meanT1Intesity = labelStatsT1WithRelabeledConnectedRegion.GetMean(currentLabel)
-          meanT2Intesity = labelStatsT2WithRelabeledConnectedRegion.GetMean(currentLabel)
+          meanT1Intensity = labelStatsT1WithRelabeledConnectedRegion.GetMean(currentLabel)
+          meanT2Intensity = labelStatsT2WithRelabeledConnectedRegion.GetMean(currentLabel)
           targetLabels = self.getTargetLabels(labelImage, relabeledConnectedRegion, inputT1VolumeImage, currentLabel)
-          diffDict = self.calculateLabelIntensityDifferenceValue(meanT1Intesity, meanT2Intesity,
+          diffDict = self.calculateLabelIntensityDifferenceValue(meanT1Intensity, meanT2Intensity,
                                                                  targetLabels, inputT1VolumeImage,
                                                                  inputT2VolumeImage, labelImage)
           if self.forceSuspiciousLabelChange:
