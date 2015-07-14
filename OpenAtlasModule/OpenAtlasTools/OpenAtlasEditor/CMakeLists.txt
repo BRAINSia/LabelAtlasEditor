@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-set(MODULE_NAME OpenAtlasEditor)
+set(MODULE_NAME LabelAtlasEditor)
 
 #-----------------------------------------------------------------------------
 set(MODULE_PYTHON_SCRIPTS
