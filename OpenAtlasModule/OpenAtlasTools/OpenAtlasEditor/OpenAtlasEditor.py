@@ -8,17 +8,17 @@ import sitkUtils as su
 import math
 
 #
-# OpenAtlasEditor
+# LabelAtlasEditor
 #
 
-class OpenAtlasEditor(ScriptedLoadableModule):
+class LabelAtlasEditor(ScriptedLoadableModule):
   """Uses ScriptedLoadableModule base class, available at:
   https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
   """
 
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
-    self.parent.title = "OpenAtlasEditor" # TODO make this more human readable by adding spaces
+    self.parent.title = "LabelAtlasEditor" # TODO make this more human readable by adding spaces
     self.parent.categories = ["Examples"]
     self.parent.dependencies = []
     self.parent.contributors = ["John Doe (AnyWare Corp.)"] # replace with "Firstname Lastname (Organization)"
@@ -31,17 +31,17 @@ class OpenAtlasEditor(ScriptedLoadableModule):
 """ # replace with organization, grant and thanks.
 
 #
-# OpenAtlasEditorWidget
+# LabelAtlasEditorWidget
 #
 
-class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
+class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
   """Uses ScriptedLoadableModuleWidget base class, available at:
   https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
   """
 
   def __init__(self, parent):
     ScriptedLoadableModuleWidget.__init__(self, parent)
-    self.logic = OpenAtlasEditorLogic()
+    self.logic = LabelAtlasEditorLogic()
 
   def setup(self):
     ScriptedLoadableModuleWidget.setup(self)
@@ -547,10 +547,10 @@ class OpenAtlasEditorWidget(ScriptedLoadableModuleWidget):
       col += 1
 
 #
-# OpenAtlasEditorLogic
+# LabelAtlasEditorLogic
 #
 
-class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
+class LabelAtlasEditorLogic(ScriptedLoadableModuleLogic):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -809,7 +809,7 @@ class OpenAtlasEditorLogic(ScriptedLoadableModuleLogic):
 
     return ijkPoint
 
-class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
+class LabelAtlasEditorTest(ScriptedLoadableModuleTest):
   """
   This is the test case for your scripted module.
   Uses ScriptedLoadableModuleTest base class, available at:
@@ -825,9 +825,9 @@ class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
     """Run as few or as many tests as needed here.
     """
     self.setUp()
-    self.test_OpenAtlasEditor1()
+    self.test_LabelAtlasEditor1()
 
-  def test_OpenAtlasEditor1(self):
+  def test_LabelAtlasEditor1(self):
     """ Ideally you should have several levels of tests.  At the lowest level
     tests sould exercise the functionality of the logic with different inputs
     (both valid and invalid).  At higher levels your tests should emulate the
@@ -859,6 +859,6 @@ class OpenAtlasEditorTest(ScriptedLoadableModuleTest):
     self.delayDisplay('Finished with download and loading\n')
 
     volumeNode = slicer.util.getNode(pattern="FA")
-    logic = OpenAtlasEditorLogic()
+    logic = LabelAtlasEditorLogic()
     self.assertTrue( logic.hasImageData(volumeNode) )
     self.delayDisplay('Test passed!')
