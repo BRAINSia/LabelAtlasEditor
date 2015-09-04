@@ -129,6 +129,133 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.castApplyButton.setStyleSheet("background-color: rgb(230,241,255)")
     castParametersFormLayout.addRow(self.castApplyButton)
 
+####################
+    #
+    # Automatic Cleanup Parameters Area
+    #
+    automaticCleanupParametersCollapsibleButton = ctk.ctkCollapsibleButton()
+    automaticCleanupParametersCollapsibleButton.text = "Automatic Cleanup Parameters"
+    automaticCleanupParametersCollapsibleButton.setContentsMargins(10, 30, 10, 10)
+    self.layout.addWidget(automaticCleanupParametersCollapsibleButton)
+
+    # Layout within the Automatic Cleanup Parameters Area collapsible button
+    automaticCleanupParametersFormLayout = qt.QFormLayout(automaticCleanupParametersCollapsibleButton)
+
+    #
+    # input volume selector for Automatic Cleanup Params
+    #
+    self.automaticCleanupParamsInputT1VolumeSelector = slicer.qMRMLNodeComboBox()
+    self.automaticCleanupParamsInputT1VolumeSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.automaticCleanupParamsInputT1VolumeSelector.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "0" )
+    self.automaticCleanupParamsInputT1VolumeSelector.selectNodeUponCreation = True
+    self.automaticCleanupParamsInputT1VolumeSelector.addEnabled = False
+    self.automaticCleanupParamsInputT1VolumeSelector.removeEnabled = False
+    self.automaticCleanupParamsInputT1VolumeSelector.noneEnabled = False
+    self.automaticCleanupParamsInputT1VolumeSelector.showHidden = False
+    self.automaticCleanupParamsInputT1VolumeSelector.showChildNodeTypes = False
+    self.automaticCleanupParamsInputT1VolumeSelector.setMRMLScene( slicer.mrmlScene )
+    self.automaticCleanupParamsInputT1VolumeSelector.setToolTip( "Pick the input to the algorithm." )
+    automaticCleanupParametersFormLayout.addRow("Input T1 Volume: ", self.automaticCleanupParamsInputT1VolumeSelector)
+
+    #
+    # input volume selector for Label Params
+    #
+    self.automaticCleanupParamsInputT2VolumeSelector = slicer.qMRMLNodeComboBox()
+    self.automaticCleanupParamsInputT2VolumeSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.automaticCleanupParamsInputT2VolumeSelector.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "0" )
+    self.automaticCleanupParamsInputT2VolumeSelector.selectNodeUponCreation = True
+    self.automaticCleanupParamsInputT2VolumeSelector.addEnabled = False
+    self.automaticCleanupParamsInputT2VolumeSelector.removeEnabled = False
+    self.automaticCleanupParamsInputT2VolumeSelector.noneEnabled = False
+    self.automaticCleanupParamsInputT2VolumeSelector.showHidden = False
+    self.automaticCleanupParamsInputT2VolumeSelector.showChildNodeTypes = False
+    self.automaticCleanupParamsInputT2VolumeSelector.setMRMLScene( slicer.mrmlScene )
+    self.automaticCleanupParamsInputT2VolumeSelector.setToolTip( "Pick the input to the algorithm." )
+    automaticCleanupParametersFormLayout.addRow("Input T2 Volume: ", self.automaticCleanupParamsInputT2VolumeSelector)
+    
+    #
+    # input label map selector for Label Params
+    #
+    self.automaticCleanupParamsInputSelectorLabel = slicer.qMRMLNodeComboBox()
+    self.automaticCleanupParamsInputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.automaticCleanupParamsInputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
+    self.automaticCleanupParamsInputSelectorLabel.selectNodeUponCreation = True
+    self.automaticCleanupParamsInputSelectorLabel.addEnabled = False
+    self.automaticCleanupParamsInputSelectorLabel.removeEnabled = False
+    self.automaticCleanupParamsInputSelectorLabel.noneEnabled = False
+    self.automaticCleanupParamsInputSelectorLabel.showHidden = False
+    self.automaticCleanupParamsInputSelectorLabel.showChildNodeTypes = False
+    self.automaticCleanupParamsInputSelectorLabel.setMRMLScene( slicer.mrmlScene )
+    self.automaticCleanupParamsInputSelectorLabel.setToolTip( "Pick the input label map to the algorithm." )
+    automaticCleanupParametersFormLayout.addRow("Input Label Map Volume: ", self.automaticCleanupParamsInputSelectorLabel)
+
+    #
+    # output label map selector
+    #
+    self.automaticCleanupParamsOutputSelectorLabel = slicer.qMRMLNodeComboBox()
+    self.automaticCleanupParamsOutputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
+    self.automaticCleanupParamsOutputSelectorLabel.addAttribute( "vtkMRMLScalarVolumeNode", "LabelMap", "1" )
+    self.automaticCleanupParamsOutputSelectorLabel.selectNodeUponCreation = True
+    self.automaticCleanupParamsOutputSelectorLabel.addEnabled = True
+    self.automaticCleanupParamsOutputSelectorLabel.renameEnabled = True
+    self.automaticCleanupParamsOutputSelectorLabel.removeEnabled = True
+    self.automaticCleanupParamsOutputSelectorLabel.noneEnabled = True
+    self.automaticCleanupParamsOutputSelectorLabel.showHidden = False
+    self.automaticCleanupParamsOutputSelectorLabel.showChildNodeTypes = False
+    self.automaticCleanupParamsOutputSelectorLabel.setMRMLScene( slicer.mrmlScene )
+    self.automaticCleanupParamsOutputSelectorLabel.setToolTip( "Pick the output label map to the algorithm." )
+    automaticCleanupParametersFormLayout.addRow("Output Label Map Volume: ", self.automaticCleanupParamsOutputSelectorLabel)
+
+    self.maximumIslandVoxelCount = ctk.ctkSliderWidget()
+    self.maximumIslandVoxelCount.singleStep = 1.0
+    self.maximumIslandVoxelCount.minimum = 1.0
+    self.maximumIslandVoxelCount.maximum = 1000.0
+    self.maximumIslandVoxelCount.value = 1.0
+    self.maximumIslandVoxelCount.setToolTip('Integer value of maximum island voxel count to correct')
+    automaticCleanupParametersFormLayout.addRow("Maximum island voxel count: ", self.maximumIslandVoxelCount)
+
+    #
+    # TextEditBoxWidget for includeLabelsList
+    #
+    self.includeLabelsList = qt.QTextEdit()
+    self.includeLabelsList.setToolTip("Integer list of labels to review (Ex: 3,6,99)")
+    self.includeLabelsList.setMaximumHeight(25)
+    automaticCleanupParametersFormLayout.addRow("Integer list of labels to review \n(Ex: 3,6,99)", self.includeLabelsList)
+
+    #
+    # TextEditBoxWidget for excludeLabelsList
+    #
+    self.excludeLabelsList = qt.QTextEdit()
+    self.excludeLabelsList.setToolTip("Integer list of labels to exclude from review (Ex: 12,100)")
+    self.excludeLabelsList.setMaximumHeight(25)
+    automaticCleanupParametersFormLayout.addRow("Integer list of labels to exclude \nfrom review (Ex: 12,100)", self.excludeLabelsList)
+
+    #
+    # check box to use the Fully Connected in the Connected Component Filter
+    #
+    self.useFullyConnectedInConnectedComponentFilterCheckBox = qt.QCheckBox()
+    self.useFullyConnectedInConnectedComponentFilterCheckBox.checked = 0
+    self.useFullyConnectedInConnectedComponentFilterCheckBox.setToolTip("Builds islands using face+edge+vertex full connectivity (default is to build islands using face connectivity)")
+    automaticCleanupParametersFormLayout.addRow("Build islands using face+edge+vertex full connectivity \n(default is to build islands using face connectivity)", self.useFullyConnectedInConnectedComponentFilterCheckBox)
+
+    #
+    # check box to force the current label to another label
+    #
+    self.forceSuspiciousLabelChangeCheckBox = qt.QCheckBox()
+    self.forceSuspiciousLabelChangeCheckBox.checked = 0
+    self.forceSuspiciousLabelChangeCheckBox.setToolTip("Forces reviewed islands of voxels to change to a different label ")
+    automaticCleanupParametersFormLayout.addRow("Forces reviewed islands of voxels \nto change to a different label ", self.forceSuspiciousLabelChangeCheckBox)
+
+    #
+    # Apply Button for the Automatic Cleanup widget
+    #
+    self.automaticCleanupParamsButton = qt.QPushButton("Apply")
+    self.automaticCleanupParamsButton.toolTip = "Run the algorithm."
+    self.automaticCleanupParamsButton.enabled = True
+    self.automaticCleanupParamsButton.setStyleSheet("background-color: rgb(230,241,255)")
+    automaticCleanupParametersFormLayout.addRow(self.automaticCleanupParamsButton)
+
+####################
     #
     # Label Parameters Area
     #
