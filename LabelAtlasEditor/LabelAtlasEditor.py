@@ -6,6 +6,7 @@ import Editor
 import SimpleITK as sitk
 import sitkUtils as su
 import math
+from Resources.atlasSmallIslandCleanup import DustCleanup
 
 #
 # LabelAtlasEditor
@@ -244,7 +245,7 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.forceSuspiciousLabelChangeCheckBox = qt.QCheckBox()
     self.forceSuspiciousLabelChangeCheckBox.checked = 0
     self.forceSuspiciousLabelChangeCheckBox.setToolTip("Forces reviewed islands of voxels to change to a different label ")
-    automaticCleanupParametersFormLayout.addRow("Forces reviewed islands of voxels \nto change to a different label ", self.forceSuspiciousLabelChangeCheckBox)
+    automaticCleanupParametersFormLayout.addRow("Force reviewed islands of voxels \nto change to a different label ", self.forceSuspiciousLabelChangeCheckBox)
 
     #
     # Apply Button for the Automatic Cleanup widget
@@ -542,6 +543,7 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.castApplyButton.connect('clicked(bool)', self.onCastApplyButton)
     self.inputCastLabelSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onCastSelect)
     self.outputCastLabelSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onCastSelect)
+    self.automaticCleanupParamsButton("currentNodeChanged(vtkMRMLNode*)", self.onAutomaticCleanupParamsButton)
     self.labelParamsApplyButton.connect('clicked(bool)', self.onLabelParamsApplyButton)
     self.applyButton.connect('clicked(bool)', self.onApplyButton)
     self.inputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
@@ -573,6 +575,9 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
   def onCastApplyButton(self):
     self.logic.runCast(self.inputCastLabelSelector.currentNode(),
                   self.outputCastLabelSelector.currentNode())
+
+  def onAutomaticCleanupParamsButton(self):
+
 
   def onLabelParamsApplyButton(self):
     self.logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
@@ -989,3 +994,14 @@ class LabelAtlasEditorTest(ScriptedLoadableModuleTest):
     logic = LabelAtlasEditorLogic()
     self.assertTrue( logic.hasImageData(volumeNode) )
     self.delayDisplay('Test passed!')
+
+class LocalDustCleanup(DustCleanup):
+  def main(self):
+    labelImage = su.PullFromSlicer(self.inputAtlasPath)
+    inputT1VolumeImage = su.PullFromSlicer(self.inputT1Path)
+    inputT2VolumeImage = su.PullFromSlicer(self.inputT2Path)
+    labelsList = self.getLabelsList(inputT1VolumeImage, labelImage)
+    for label in labelsList:
+      labelImage = self.relabelCurrentLabel(labelImage, inputT1VolumeImage, inputT2VolumeImage, label)
+    self.printIslandStatistics()
+    su.PushLabel(labelImage, self.outputAtlasPath, overwrite=True)
