@@ -577,7 +577,10 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
                   self.outputCastLabelSelector.currentNode())
 
   def onAutomaticCleanupParamsButton(self):
-
+    arguments = {'--inputAtlasPath': self.automaticCleanupParamsInputSelectorLabel.currentNode().GetName(),
+                 '--outputAtlasPath': self.automaticCleanupParamsOutputSelectorLabel.currentNode().GetName()}
+    print arguments
+    localDustCleanupObject = LocalDustCleanup(arguments=arguments)
 
   def onLabelParamsApplyButton(self):
     self.logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
