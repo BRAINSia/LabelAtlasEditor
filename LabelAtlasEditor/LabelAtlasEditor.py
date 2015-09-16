@@ -583,12 +583,13 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
                  '--outputAtlasPath': self.automaticCleanupParamsOutputSelectorLabel.currentNode().GetName(),
                  '--includeLabelsList': str(self.includeLabelsList.toPlainText()),
                  '--excludeLabelsList': str(self.excludeLabelsList.toPlainText()),
-                 '--maximumIslandVoxelCount': str(self.maximumIslandVoxelCount.value),
+                 '--maximumIslandVoxelCount': int(self.maximumIslandVoxelCount.value),
                  '--useFullyConnectedInConnectedComponentFilter': self.useFullyConnectedInConnectedComponentFilterCheckBox.checked,
                  '--forceSuspiciousLabelChange': self.forceSuspiciousLabelChangeCheckBox.checked
                  }
     print arguments
-    #localDustCleanupObject = LocalDustCleanup(arguments=arguments)
+    localDustCleanupObject = LocalDustCleanup(arguments=arguments)
+    localDustCleanupObject.main()
 
   def onLabelParamsApplyButton(self):
     self.logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
@@ -1015,4 +1016,13 @@ class LocalDustCleanup(DustCleanup):
     for label in labelsList:
       labelImage = self.relabelCurrentLabel(labelImage, inputT1VolumeImage, inputT2VolumeImage, label)
     self.printIslandStatistics()
+
     su.PushLabel(labelImage, self.outputAtlasPath, overwrite=True)
+    self.setLabelLUT()
+
+  def setLabelLUT(self):
+    inputNode = slicer.util.getNode(pattern=self.inputAtlasPath)
+    inputLabelNodeLUTNodeID = inputNode.GetDisplayNode().GetColorNodeID()
+    outputNode = slicer.util.getNode(pattern=self.outputAtlasPath)
+    outputNode.GetDisplayNode().SetAndObserveColorNodeID(inputLabelNodeLUTNodeID)
+    
