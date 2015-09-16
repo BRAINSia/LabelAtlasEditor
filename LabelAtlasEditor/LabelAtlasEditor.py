@@ -543,7 +543,7 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.castApplyButton.connect('clicked(bool)', self.onCastApplyButton)
     self.inputCastLabelSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onCastSelect)
     self.outputCastLabelSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onCastSelect)
-    self.automaticCleanupParamsButton("currentNodeChanged(vtkMRMLNode*)", self.onAutomaticCleanupParamsButton)
+    self.automaticCleanupParamsButton.connect('clicked(bool)', self.onAutomaticCleanupParamsButton)
     self.labelParamsApplyButton.connect('clicked(bool)', self.onLabelParamsApplyButton)
     self.applyButton.connect('clicked(bool)', self.onApplyButton)
     self.inputSelectorLabel.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
@@ -578,9 +578,17 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
 
   def onAutomaticCleanupParamsButton(self):
     arguments = {'--inputAtlasPath': self.automaticCleanupParamsInputSelectorLabel.currentNode().GetName(),
-                 '--outputAtlasPath': self.automaticCleanupParamsOutputSelectorLabel.currentNode().GetName()}
+                 '--inputT1Path': self.automaticCleanupParamsInputT1VolumeSelector.currentNode().GetName(),
+                 '--inputT2Path': self.automaticCleanupParamsInputT2VolumeSelector.currentNode().GetName(),
+                 '--outputAtlasPath': self.automaticCleanupParamsOutputSelectorLabel.currentNode().GetName(),
+                 '--includeLabelsList': str(self.includeLabelsList.toPlainText()),
+                 '--excludeLabelsList': str(self.excludeLabelsList.toPlainText()),
+                 '--maximumIslandVoxelCount': str(self.maximumIslandVoxelCount.value),
+                 '--useFullyConnectedInConnectedComponentFilter': self.useFullyConnectedInConnectedComponentFilterCheckBox.checked,
+                 '--forceSuspiciousLabelChange': self.forceSuspiciousLabelChangeCheckBox.checked
+                 }
     print arguments
-    localDustCleanupObject = LocalDustCleanup(arguments=arguments)
+    #localDustCleanupObject = LocalDustCleanup(arguments=arguments)
 
   def onLabelParamsApplyButton(self):
     self.logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
