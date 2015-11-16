@@ -178,10 +178,10 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.automaticCleanupParamsInputT1VolumeSelector.showChildNodeTypes = False
     self.automaticCleanupParamsInputT1VolumeSelector.setMRMLScene( slicer.mrmlScene )
     self.automaticCleanupParamsInputT1VolumeSelector.setToolTip( "Pick the input to the algorithm." )
-    automaticCleanupParametersFormLayout.addRow("Input T1 Volume: ", self.automaticCleanupParamsInputT1VolumeSelector)
+    automaticCleanupParametersFormLayout.addRow("Input Intensity Volume 1: ", self.automaticCleanupParamsInputT1VolumeSelector)
 
     #
-    # input volume selector for Label Params
+    # input volume selector for Automatic Cleanup Params
     #
     self.automaticCleanupParamsInputT2VolumeSelector = slicer.qMRMLNodeComboBox()
     self.automaticCleanupParamsInputT2VolumeSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
@@ -194,10 +194,10 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.automaticCleanupParamsInputT2VolumeSelector.showChildNodeTypes = False
     self.automaticCleanupParamsInputT2VolumeSelector.setMRMLScene( slicer.mrmlScene )
     self.automaticCleanupParamsInputT2VolumeSelector.setToolTip( "Pick the input to the algorithm." )
-    automaticCleanupParametersFormLayout.addRow("Input T2 Volume: ", self.automaticCleanupParamsInputT2VolumeSelector)
+    automaticCleanupParametersFormLayout.addRow("Input Intensity Volume 2 (optional): ", self.automaticCleanupParamsInputT2VolumeSelector)
     
     #
-    # input label map selector for Label Params
+    # input label map selector for Automatic Cleanup Params
     #
     self.automaticCleanupParamsInputSelectorLabel = slicer.qMRMLNodeComboBox()
     self.automaticCleanupParamsInputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
@@ -213,7 +213,7 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     automaticCleanupParametersFormLayout.addRow("Input Label Map Volume: ", self.automaticCleanupParamsInputSelectorLabel)
 
     #
-    # output label map selector
+    # output label map selector for Automatic Cleanup Params
     #
     self.automaticCleanupParamsOutputSelectorLabel = slicer.qMRMLNodeComboBox()
     self.automaticCleanupParamsOutputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
@@ -238,44 +238,44 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     automaticCleanupParametersFormLayout.addRow("Maximum island voxel count: ", self.maximumIslandVoxelCount)
 
     #
-    # TextEditBoxWidget for includeLabelsList
+    # TextEditBoxWidget for includeLabelsList for Automatic Cleanup Params
     #
     self.includeLabelsList = qt.QTextEdit()
     self.includeLabelsList.setToolTip("Integer list of labels to review (Ex: 3,6,99)")
     self.includeLabelsList.setMaximumHeight(25)
-    automaticCleanupParametersFormLayout.addRow("Integer list of labels to review \n(Ex: 3,6,99)", self.includeLabelsList)
+    automaticCleanupParametersFormLayout.addRow("Integer list of labels to review (optional) \n(Ex: 3,6,99)", self.includeLabelsList)
 
     #
-    # TextEditBoxWidget for excludeLabelsList
+    # TextEditBoxWidget for excludeLabelsList for Automatic Cleanup Params
     #
     self.excludeLabelsList = qt.QTextEdit()
     self.excludeLabelsList.setToolTip("Integer list of labels to exclude from review (Ex: 12,100)")
     self.excludeLabelsList.setMaximumHeight(25)
-    automaticCleanupParametersFormLayout.addRow("Integer list of labels to exclude \nfrom review (Ex: 12,100)", self.excludeLabelsList)
+    automaticCleanupParametersFormLayout.addRow("Integer list of labels to exclude from\nreview (optional) (Ex: 12,100)\n", self.excludeLabelsList)
 
     #
-    # check box to dilate
+    # check box to dilate for Automatic Cleanup Params
     #
     self.noDilationCheckBox = qt.QCheckBox()
     self.noDilationCheckBox.checked = 1
     self.noDilationCheckBox.setToolTip("Do not dilate islands when determining connectivity")
-    automaticCleanupParametersFormLayout.addRow("Do not dilate islands when determining connectivity", self.noDilationCheckBox)
+    automaticCleanupParametersFormLayout.addRow("Do not dilate islands when \ndetermining connectivity\n", self.noDilationCheckBox)
 
     #
-    # check box to use the Fully Connected in the Connected Component Filter
+    # check box to use the Fully Connected in the Connected Component Filter for Automatic Cleanup Params
     #
     self.useFullyConnectedInConnectedComponentFilterCheckBox = qt.QCheckBox()
     self.useFullyConnectedInConnectedComponentFilterCheckBox.checked = 0
-    self.useFullyConnectedInConnectedComponentFilterCheckBox.setToolTip("Builds islands using face+edge+vertex full connectivity (default is to build islands using face connectivity)")
-    automaticCleanupParametersFormLayout.addRow("Build islands using face+edge+vertex full connectivity \n(default is to build islands using face connectivity)", self.useFullyConnectedInConnectedComponentFilterCheckBox)
+    self.useFullyConnectedInConnectedComponentFilterCheckBox.setToolTip("Build islands using 8-neighbor (full) connectivity (default is to build islands using 4-neighbor (face) connectivity)")
+    automaticCleanupParametersFormLayout.addRow("Build islands using 8-neighbor (full) \nconnectivity (default is to build islands \nusing 4-neighbor (face) connectivity)\n", self.useFullyConnectedInConnectedComponentFilterCheckBox)
 
     #
-    # check box to force the current label to another label
+    # check box to force the current label to another label for Automatic Cleanup Params
     #
     self.forceSuspiciousLabelChangeCheckBox = qt.QCheckBox()
     self.forceSuspiciousLabelChangeCheckBox.checked = 0
     self.forceSuspiciousLabelChangeCheckBox.setToolTip("Forces reviewed islands of voxels to change to a different label ")
-    automaticCleanupParametersFormLayout.addRow("Force reviewed islands of voxels \nto change to a different label ", self.forceSuspiciousLabelChangeCheckBox)
+    automaticCleanupParametersFormLayout.addRow("Force reviewed islands of voxels \nto change to a different label\n", self.forceSuspiciousLabelChangeCheckBox)
 
     #
     # Apply Button for the Automatic Cleanup widget
@@ -295,11 +295,11 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     labelParametersCollapsibleButton.setContentsMargins(10, 30, 10, 10)
     self.layout.addWidget(labelParametersCollapsibleButton)
 
-    # Layout within the Label Parameters Area collapsible button
+    # Layout within the Label Suggestion Parameters Area collapsible button
     labelParametersFormLayout = qt.QFormLayout(labelParametersCollapsibleButton)
     
     #
-    # input volume selector for Label Params
+    # input volume selector for Label Suggestion Params
     #
     self.labelParamsInputT1VolumeSelector = slicer.qMRMLNodeComboBox()
     self.labelParamsInputT1VolumeSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
@@ -312,10 +312,10 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.labelParamsInputT1VolumeSelector.showChildNodeTypes = False
     self.labelParamsInputT1VolumeSelector.setMRMLScene( slicer.mrmlScene )
     self.labelParamsInputT1VolumeSelector.setToolTip( "Pick the input to the algorithm." )
-    labelParametersFormLayout.addRow("Input T1 Volume: ", self.labelParamsInputT1VolumeSelector)
+    labelParametersFormLayout.addRow("Input Intensity Volume 1: ", self.labelParamsInputT1VolumeSelector)
     
     #
-    # input volume selector for Label Params
+    # input volume selector for Label Suggestion Params
     #
     self.labelParamsInputT2VolumeSelector = slicer.qMRMLNodeComboBox()
     self.labelParamsInputT2VolumeSelector.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
@@ -328,10 +328,10 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.labelParamsInputT2VolumeSelector.showChildNodeTypes = False
     self.labelParamsInputT2VolumeSelector.setMRMLScene( slicer.mrmlScene )
     self.labelParamsInputT2VolumeSelector.setToolTip( "Pick the input to the algorithm." )
-    labelParametersFormLayout.addRow("Input T2 Volume: ", self.labelParamsInputT2VolumeSelector)
+    labelParametersFormLayout.addRow("Input Intensity Volume 2: ", self.labelParamsInputT2VolumeSelector)
     
     #
-    # input label map selector for Label Params
+    # input label map selector for Label Suggestion Params
     #
     self.labelParamsInputSelectorLabel = slicer.qMRMLNodeComboBox()
     self.labelParamsInputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
@@ -347,7 +347,7 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     labelParametersFormLayout.addRow("Input Label Map Volume: ", self.labelParamsInputSelectorLabel)
 
     #
-    # output label map selector
+    # output label map selector for Label Suggestion Params
     #
     self.labelParamsOutputSelectorLabel = slicer.qMRMLNodeComboBox()
     self.labelParamsOutputSelectorLabel.nodeTypes = ( ("vtkMRMLScalarVolumeNode"), "" )
@@ -364,7 +364,7 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     labelParametersFormLayout.addRow("Output Label Map Volume: ", self.labelParamsOutputSelectorLabel)
 
     #
-    # Add fiducial Button
+    # Add fiducial Button for Label Suggestion Params
     #
     self.labelParamsAddFiducialButton = qt.QPushButton("Add fiducial point")
     self.labelParamsAddFiducialButton.toolTip = "Add the fiducial point."
@@ -373,7 +373,7 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     labelParametersFormLayout.addRow("Step 1:", self.labelParamsAddFiducialButton)
 
     #
-    # Calculate Square Diffs of Means Button
+    # Calculate Square Diffs of Means Button for Label Suggestion Params
     #
     self.labelParamsApplyButton = qt.QPushButton("Calculate Square Diffs of Means")
     self.labelParamsApplyButton.toolTip = "Run the algorithm."
@@ -381,14 +381,14 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.labelParamsApplyButton.setStyleSheet("background-color: rgb(230,241,255)")
     labelParametersFormLayout.addRow("Step 2:", self.labelParamsApplyButton)
 
-    # model and view for stats table
+    # model and view for stats table for Label Suggestion Params
     self.view = qt.QTableView()
     self.view.sortingEnabled = True
     self.view.setMaximumHeight(0)
     labelParametersFormLayout.addWidget(self.view)
 
     #
-    # Apply Button
+    # Apply Button for Label Suggestion Params
     #
     self.labelParamsRelabelButton = qt.QPushButton("Relabel output label map to checked label")
     self.labelParamsRelabelButton.toolTip = "Run the algorithm."
