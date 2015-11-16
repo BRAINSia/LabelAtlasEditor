@@ -73,7 +73,7 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     #
     # Reload and Test area
     #
-    if True:
+    if False:
         """Developer interface"""
         reloadCollapsibleButton = ctk.ctkCollapsibleButton()
         reloadCollapsibleButton.text = "Advanced - Reload && Test"
