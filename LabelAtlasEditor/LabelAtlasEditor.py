@@ -98,11 +98,12 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
         reloadFormLayout.addWidget(self.reloadAndTestButton)
         self.reloadAndTestButton.connect('clicked()', self.onReloadAndTest)
 
-    #
-    # Cast Label Map to Signed 16-bit Parameters Area
-    #
+    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    #% Cast Label Map to Signed 16-bit Parameters Area %%
+    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     castParametersCollapsibleButton = ctk.ctkCollapsibleButton()
-    castParametersCollapsibleButton.text = "Cast Label Map to Signed 16-bit for use in Editor Parameters"
+    castParametersCollapsibleButton.text = "Cast Label Map to Signed 16-bit for use in Editor"
     castParametersCollapsibleButton.setContentsMargins(10, 30, 10, 10)
     self.layout.addWidget(castParametersCollapsibleButton)
 
@@ -151,12 +152,12 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.castApplyButton.setStyleSheet("background-color: rgb(230,241,255)")
     castParametersFormLayout.addRow(self.castApplyButton)
 
-####################
-    #
-    # Automatic Cleanup Parameters Area
-    #
+    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    #% Automatic Dust Cleanup Parameters Area %%
+    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     automaticCleanupParametersCollapsibleButton = ctk.ctkCollapsibleButton()
-    automaticCleanupParametersCollapsibleButton.text = "Automatic Cleanup Parameters"
+    automaticCleanupParametersCollapsibleButton.text = "Automatic Dust Cleanup"
     automaticCleanupParametersCollapsibleButton.setContentsMargins(10, 30, 10, 10)
     self.layout.addWidget(automaticCleanupParametersCollapsibleButton)
 
@@ -277,12 +278,12 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.automaticCleanupParamsButton.setStyleSheet("background-color: rgb(230,241,255)")
     automaticCleanupParametersFormLayout.addRow(self.automaticCleanupParamsButton)
 
-####################
-    #
-    # Label Parameters Area
-    #
+    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    #% Label Suggestion Parameters Area %%
+    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     labelParametersCollapsibleButton = ctk.ctkCollapsibleButton()
-    labelParametersCollapsibleButton.text = "Label Parameters"
+    labelParametersCollapsibleButton.text = "Label Suggestion"
     labelParametersCollapsibleButton.setContentsMargins(10, 30, 10, 10)
     self.layout.addWidget(labelParametersCollapsibleButton)
 
@@ -387,11 +388,12 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.labelParamsRelabelButton.setStyleSheet("background-color: rgb(230,241,255)")
     labelParametersFormLayout.addRow("Step 3:", self.labelParamsRelabelButton)
 
-    #
-    # Merge Suspicious Label to Target Label Parameters Area
-    #
+    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    #% Merge Suspicious Label to Target Label Parameters Area %%
+    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     parametersCollapsibleButton = ctk.ctkCollapsibleButton()
-    parametersCollapsibleButton.text = "Merge Suspicious Label to Target Label Parameters"
+    parametersCollapsibleButton.text = "Merge Suspicious Label to Target Label"
     parametersCollapsibleButton.setContentsMargins(10, 30, 10, 10)
     self.layout.addWidget(parametersCollapsibleButton)
 
