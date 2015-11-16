@@ -19,17 +19,38 @@ class LabelAtlasEditor(ScriptedLoadableModule):
 
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
-    self.parent.title = "LabelAtlasEditor" # TODO make this more human readable by adding spaces
-    self.parent.categories = ["Examples"]
+    self.parent.title = "LabelAtlasEditor"
+    self.parent.categories = ["Segmentation"]
     self.parent.dependencies = []
-    self.parent.contributors = ["John Doe (AnyWare Corp.)"] # replace with "Firstname Lastname (Organization)"
+    self.parent.contributors = ["Jessica Forbes (University of Iowa)", "Hans Johnson (University of Iowa)"]
     self.parent.helpText = """
-    This is an example of scripted loadable module bundled in an extension.
+    (1) The Label Merge widget allows a user to utilize a mask or a posterior probability
+    map while merging the voxels of different labels in order to ensure that a voxel meets
+    a user-defined minimum probability for a specific type, e.g., white matter or cerebrospinal
+    fluid. (2) The Label Suggestion widget provides a list of candidate labels for a
+    questionable group of voxels based on the neighborhood information attained from intensity
+    images. (3) The Automatic Dust Cleanup widget automatically merges large amounts of small,
+    disconnected regions to the most similar bordering label via the process employed in the
+    Label Suggestion widget. We used the open-source image processing toolkit SimpleITK for
+    processing the label atlases. For convenience, we included the 3D Slicer widgets Editor and
+    Markups within this all-in-one module to expedite the manual cleaning process when required.
+    Assuming that one label represents a single biological structure or densely packed structures,
+    small isolated regions should be examined for validity. The open-source software OpenAtlas can
+    be used for providing an excellent three-dimensional visualization of the disconnected
+    ROIs. This tool identifies errors that are difficult to visually recognize in two-dimensional
+    slices, by placing a fiducial point on each disconnected region. Within the Markups widget,
+    the user selects a target region from the fiducial points to view and easily modify by using
+    Editor or one of the custom widgets that we developed.
     """
     self.parent.acknowledgementText = """
-    This file was originally developed by Jean-Christophe Fillion-Robin, Kitware Inc.
-    and Steve Pieper, Isomics, Inc. and was partially funded by NIH grant 3P41RR013218-12S1.
-""" # replace with organization, grant and thanks.
+    This project was funded by multiple grants: Huntington's Disease Society of America
+    (Human Biology Project Fellowship), BRAINS (R01 NS050568), Validation of Structural/Functional
+    MRI Localization (R01 EB000975), 3D Shape Analysis for Computational Anatomy (R01 EB008171),
+    Neurobiological Predictors of HD (R01 NS040068), Cognitive and Functional Brain Changes in
+    Preclinical HD (R01 NS054893), Algorithms for Functional and Anatomical Brain Analysis
+    (P41 RR015241), Enterprise Storage in a Collaborative Neuroimaging Environment (S10 RR023392),
+    Core 2b HD (U54 EB005149), and NIPYPE (R03 EB008673).
+    """
 
 #
 # LabelAtlasEditorWidget
