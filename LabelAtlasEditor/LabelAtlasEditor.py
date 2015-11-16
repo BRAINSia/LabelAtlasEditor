@@ -254,6 +254,14 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     automaticCleanupParametersFormLayout.addRow("Integer list of labels to exclude \nfrom review (Ex: 12,100)", self.excludeLabelsList)
 
     #
+    # check box to dilate
+    #
+    self.noDilationCheckBox = qt.QCheckBox()
+    self.noDilationCheckBox.checked = 1
+    self.noDilationCheckBox.setToolTip("Do not dilate islands when determining connectivity")
+    automaticCleanupParametersFormLayout.addRow("Do not dilate islands when determining connectivity", self.noDilationCheckBox)
+
+    #
     # check box to use the Fully Connected in the Connected Component Filter
     #
     self.useFullyConnectedInConnectedComponentFilterCheckBox = qt.QCheckBox()
@@ -606,6 +614,7 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
                  '--includeLabelsList': str(self.includeLabelsList.toPlainText()),
                  '--excludeLabelsList': str(self.excludeLabelsList.toPlainText()),
                  '--maximumIslandVoxelCount': int(self.maximumIslandVoxelCount.value),
+                 '--noDilation': self.noDilationCheckBox.checked,
                  '--useFullyConnectedInConnectedComponentFilter': self.useFullyConnectedInConnectedComponentFilterCheckBox.checked,
                  '--forceSuspiciousLabelChange': self.forceSuspiciousLabelChangeCheckBox.checked
                  }
