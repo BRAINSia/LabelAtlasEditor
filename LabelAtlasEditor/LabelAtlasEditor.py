@@ -608,6 +608,9 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
                   self.outputCastLabelSelector.currentNode())
 
   def onAutomaticCleanupParamsButton(self):
+    self.automaticCleanupParamsButton.text = "Working..."
+    self.automaticCleanupParamsButton.repaint()
+    slicer.app.processEvents()
     arguments = {'--inputAtlasPath': self.automaticCleanupParamsInputSelectorLabel.currentNode().GetName(),
                  '--inputT1Path': self.automaticCleanupParamsInputT1VolumeSelector.currentNode().GetName(),
                  '--outputAtlasPath': self.automaticCleanupParamsOutputSelectorLabel.currentNode().GetName(),
@@ -625,6 +628,7 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     print arguments
     localDustCleanupObject = LocalDustCleanup(arguments=arguments)
     localDustCleanupObject.main()
+    self.automaticCleanupParamsButton.text = "Apply"
 
   def onLabelParamsApplyButton(self):
     self.logic.runGetRegionInfo(self.labelParamsInputSelectorLabel.currentNode().GetName(),
@@ -641,6 +645,9 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
                                         self.items)
 
   def onApplyButton(self):
+    self.applyButton.text = "Working..."
+    self.applyButton.repaint()
+    slicer.app.processEvents()
 
     print("Merge Apply button selected")
 
@@ -657,6 +664,7 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
               enablePosterior=True,
               inputPosteriorName=self.inputSelectorPosterior.currentNode().GetName(),
               posteriorThreshold=self.posteriorThreshold.value)
+    self.applyButton.text = "Apply"
 
   def onEnablePosteriorSelect(self):
     self.onSelect()
