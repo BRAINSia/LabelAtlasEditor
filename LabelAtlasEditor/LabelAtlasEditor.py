@@ -189,7 +189,7 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.automaticCleanupParamsInputT2VolumeSelector.selectNodeUponCreation = True
     self.automaticCleanupParamsInputT2VolumeSelector.addEnabled = False
     self.automaticCleanupParamsInputT2VolumeSelector.removeEnabled = False
-    self.automaticCleanupParamsInputT2VolumeSelector.noneEnabled = False
+    self.automaticCleanupParamsInputT2VolumeSelector.noneEnabled = True
     self.automaticCleanupParamsInputT2VolumeSelector.showHidden = False
     self.automaticCleanupParamsInputT2VolumeSelector.showChildNodeTypes = False
     self.automaticCleanupParamsInputT2VolumeSelector.setMRMLScene( slicer.mrmlScene )
@@ -602,7 +602,6 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
   def onAutomaticCleanupParamsButton(self):
     arguments = {'--inputAtlasPath': self.automaticCleanupParamsInputSelectorLabel.currentNode().GetName(),
                  '--inputT1Path': self.automaticCleanupParamsInputT1VolumeSelector.currentNode().GetName(),
-                 '--inputT2Path': self.automaticCleanupParamsInputT2VolumeSelector.currentNode().GetName(),
                  '--outputAtlasPath': self.automaticCleanupParamsOutputSelectorLabel.currentNode().GetName(),
                  '--includeLabelsList': str(self.includeLabelsList.toPlainText()),
                  '--excludeLabelsList': str(self.excludeLabelsList.toPlainText()),
@@ -610,6 +609,10 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
                  '--useFullyConnectedInConnectedComponentFilter': self.useFullyConnectedInConnectedComponentFilterCheckBox.checked,
                  '--forceSuspiciousLabelChange': self.forceSuspiciousLabelChangeCheckBox.checked
                  }
+    if self.automaticCleanupParamsInputT2VolumeSelector.currentNode():
+        arguments['--inputT2Path'] = self.automaticCleanupParamsInputT2VolumeSelector.currentNode().GetName()
+    else:
+        arguments['--inputT2Path'] = None
     print arguments
     localDustCleanupObject = LocalDustCleanup(arguments=arguments)
     localDustCleanupObject.main()
@@ -1034,7 +1037,10 @@ class LocalDustCleanup(DustCleanup):
   def main(self):
     labelImage = su.PullFromSlicer(self.inputAtlasPath)
     inputT1VolumeImage = su.PullFromSlicer(self.inputT1Path)
-    inputT2VolumeImage = su.PullFromSlicer(self.inputT2Path)
+    if self.inputT2Path:
+      inputT2VolumeImage = su.PullFromSlicer(self.inputT2Path)
+    else:
+      inputT2VolumeImage = None
     labelsList = self.getLabelsList(inputT1VolumeImage, labelImage)
     for label in labelsList:
       labelImage = self.relabelCurrentLabel(labelImage, inputT1VolumeImage, inputT2VolumeImage, label)
