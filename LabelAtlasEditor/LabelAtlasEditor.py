@@ -499,7 +499,7 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.posteriorThreshold.setStyleSheet("color: rgb(230,241,255)")
     self.posteriorThreshold.setToolTip('Set the threshold for the posterior image (only pixels '
                                        'above this threshold will be changed')
-    self.posteriorParametersFormLayout.addRow("Posterior threshold for Posterior Image: ", self.posteriorThreshold)
+    self.posteriorParametersFormLayout.addRow("Minimum threshold for posterior volume: ", self.posteriorThreshold)
 
     #
     # output label map selector

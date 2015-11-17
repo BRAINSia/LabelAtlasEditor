@@ -4,12 +4,12 @@ project(LabelAtlasEditor)
 
 #-----------------------------------------------------------------------------
 # Extension meta-information
-set(EXTENSION_HOMEPAGE "https://github.com/BRAINSia/LabelAtlasEditor")
+set(EXTENSION_HOMEPAGE "http://brainsia.github.io/LabelAtlasEditor")
 set(EXTENSION_CATEGORY "Segmentation")
 set(EXTENSION_CONTRIBUTORS "Jessica Forbes (University of Iowa), Hans Johnson (University of Iowa)")
-set(EXTENSION_DESCRIPTION "Label atlases are utilized in medical imaging to segment an image into anatomical regions. Atlases often contain inaccuracies that will be propagated throughout the study if not identified and corrected. This Slicer module allows a user to visualize and efficiently edit errors in label atlases. ")
-set(EXTENSION_ICONURL "http://www.example.com/Slicer/Extensions/LabelAtlasEditor.png")
-set(EXTENSION_SCREENSHOTURLS "http://www.example.com/Slicer/Extensions/LabelAtlasEditor/Screenshots/1.png")
+set(EXTENSION_DESCRIPTION "This module is for editing label atlases and cleaning small islands of disconnected voxels.")
+set(EXTENSION_ICONURL "https://github.com/BRAINSia/LabelAtlasEditor/blob/master/LabelAtlasEditor/Resources/Icons/LabelAtlasEditor.png")
+set(EXTENSION_SCREENSHOTURLS "https://github.com/BRAINSia/LabelAtlasEditor/blob/master/automaticDustCleaningWidget.png" "https://github.com/BRAINSia/LabelAtlasEditor/blob/master/labelSuggestionWidget.png" "https://github.com/BRAINSia/LabelAtlasEditor/blob/master/mergeWidget.png" "https://github.com/BRAINSia/LabelAtlasEditor/blob/master/LabelAtlasEditor.png")
 
 #-----------------------------------------------------------------------------
 # Extension dependencies
