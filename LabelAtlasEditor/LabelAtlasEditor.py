@@ -519,6 +519,13 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     parametersFormLayout.addRow("Output Label Map Volume: ", self.outputSelectorLabel)
 
     #
+    # Adds the Editor Widget
+    #
+    self.localEditorWidget = Editor.EditorWidget(parent=self.parent, showVolumesFrame=True)
+    self.localEditorWidget.setup()
+    self.localEditorWidget.enter()
+
+    #
     # Markups Area
     #
     markupsCollapsibleButton = ctk.ctkCollapsibleButton()
@@ -535,13 +542,6 @@ class LabelAtlasEditorWidget(ScriptedLoadableModuleWidget):
     self.localMarkupsWidget.setParent(self.parent)
     markupsFormLayout.addRow(self.localMarkupsWidget)
     self.localMarkupsWidget.show()
-
-    #
-    # Adds the Editor Widget
-    #
-    self.localEditorWidget = Editor.EditorWidget(parent=self.parent, showVolumesFrame=True)
-    self.localEditorWidget.setup()
-    self.localEditorWidget.enter()
 
     #
     # Models Area
